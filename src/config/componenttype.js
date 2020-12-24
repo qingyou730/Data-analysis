@@ -25,6 +25,10 @@ export default {
           label: "单选下拉框",
         },
         {
+          value: "dynamicSingle",
+          label: "动静态单选下拉框",
+        },
+        {
           value: "multipleSelect",
           label: "多选下拉框",
         },
@@ -75,6 +79,14 @@ export default {
         {
           value: "timeDetail",
           label: "精确时间",
+        },
+        {
+          value: "dynamicLinksingle",
+          label: "动态群组联动下拉框",
+        },
+        {
+          value: "routineFixedobj",
+          label: "常规动态群组类型",
         },
       ],
 }

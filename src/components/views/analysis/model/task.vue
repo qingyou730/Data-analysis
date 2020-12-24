@@ -1,20 +1,33 @@
 <template>
   <el-row class="gray-container" id="model_div">
     <!-- 内部人查看 START -->
-      <el-dropdown  v-if="isEdit && type!='cron'"  style="position: absolute;top: 0px;right: 20px; padding: 3px 3px; font-size: 18px" trigger="click"
+      <!-- <el-image :title="ford_decs" :src="isFold()" @click="showConditions" style="position: absolute;top: 10px;right: 50px; width: 14px;"/> -->
+      <span v-if="isEdit && type!='cron'"  @click="showConditions" style="cursor:pointer; position: absolute;top: 10px;right: 50px;font-size: 12px;color: #606266;display:inline-block">
+        <i class="el-icon-d-arrow-right" :style="{transform: show_condition ? 'rotate(-90deg)':'rotate(90deg)',marginRight:'3px'}"></i>
+        {{show_condition?'页面收起':'页面展开'}}
+      </span>
+<!--    <el-dropdown style="position: absolute;top: 0px;right: 50px; padding: 3px 3px; font-size: 18px" trigger="hover">-->
+<!--        <span class="el-dropdown-link">-->
+<!--          <img :src="isFold()" @click="showConditions" style="width: 14px"/>-->
+<!--        </span>-->
+<!--      <el-dropdown-menu slot="dropdown">-->
+<!--        <el-dropdown-item>参数</el-dropdown-item>-->
+<!--      </el-dropdown-menu>-->
+<!--    </el-dropdown>-->
+    <el-dropdown  v-if="isEdit && type!='cron' && $access('/analysis/task/controlsee')"  style="position: absolute;top: 0px;right: 20px; padding: 3px 3px; font-size: 18px" trigger="hover"
         @command="handleCommand">
         <span class="el-dropdown-link">
           <i style="cursor: pointer;font-size: 24px; z-index:10000;" type="primary" :class="`el-icon-caret-bottom color-primary`"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="param">参数</el-dropdown-item>
-          <el-dropdown-item command="sql">SQL</el-dropdown-item>
+          <el-dropdown-item command="sql" >SQL</el-dropdown-item>
           <el-dropdown-item v-if="type=='task'" ><a style="color: black;" target="_blank" :href="$store.state.api_url.job.yarn_log +'?job_id='+task.task_id">yarn日志</a></el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     <!-- 内部人查看 END -->
     <h2 class="page-title">{{this.model.zhName}}</h2>
-    <el-row v-if="load_finish" v-for="step in step_list" :key="step.step" class="step_row">
+    <el-row v-show="show_condition" v-if="load_finish" v-for="step in step_list" :key="step.step" class="step_row">
       <el-col :span="2" class="task_left">
         <el-row>
           <el-col :span="10" class="text-right">
@@ -74,7 +87,7 @@
 
 
     <!--立即分析 保存视图按钮-->
-    <el-row  v-if="load_finish"  class="step_row" style="height: 145px;min-height: initial;">
+    <el-row v-show="show_condition"  v-if="load_finish"  class="step_row" style="height: 145px;min-height: initial;">
       <el-col :span="2" class="task_left">
         <el-row>
           <el-col :span="10" class="text-right">
@@ -249,7 +262,19 @@
               <el-option label="全部" value="all"></el-option>
               <el-option label="指定列" value="otherCol"></el-option>
             </el-select>
-            <el-button type="primary" @click="refreshData">确定</el-button>
+          </div>
+          <div class="my-form-row" id="fixcolumn-position-task" v-show="this.show.unfold">
+            <span class="my-form-label">配置固定列:</span>
+            <div style="display: inline-block;margin-top: 6px;">
+              <show-fixcolmn  v-if="openShowFixcolumn" v-model="fixed_column" :indicators="show.field_list" :id="this.task.task_id" :fixed_column_str="fixed_column" :key="show_fixcolmn_num+'key'"></show-fixcolmn>
+              <span class="task-col-wrapper">
+                <span style="display:inline-block;color:#0e73ff;margin: 0 16px;cursor:pointer" @click="configureFixColumn">{{openShowFixcolumn?"编辑":"添加"}}</span>
+                <el-tooltip class="item" effect="dark" content="对数据结果进行条件设设定，且条件持续生效" placement="right">
+                  <i class="el-icon-question" style="color:#ccc;margin: 0 16px 0 0;font-size:18px"></i>
+                </el-tooltip>
+                <el-button type="primary" @click="fixColumnParam()" size="small">确定</el-button>
+              </span>
+            </div>
           </div>
         </div>
       </el-col>
@@ -268,9 +293,11 @@
       </div>
     </el-row>
     <!--任务进度条-->
-    <step v-if="task.showStep " v-model="task.showStep" :task_id="task.task_id" :parent_step="task.step"> </step>
+<!--    <step v-if="task.showStep " v-model="task.showStep" :task_id="task.task_id" :parent_step="task.step"> </step>-->
+    <new_step v-if="task.showStep" v-model="task.showStep" :task_id="task.task_id" :parent_step="task.step"> </new_step>
     <view-otherclo v-model="viewCloflag" :field_list="show.field_list" :wantUseclo="wantUseclo"></view-otherclo>
-
+    <fix-column v-model="fixcolmunFlag" :indicators="show.field_list" :id="this.task.task_id" @changeFixcolmnFun="changeFixcolmnFun" 
+      @configureFixColumn="configureFixColumn" @showFixcolmnFun="showFixcolmnFun"></fix-column>
 
   </el-row>
 
@@ -312,12 +339,23 @@
   import viewOtherclo from "./viewOtherclo.vue"
   import funnel from "@/components/base/funnel.vue"
   import windowPeriod from "@/components/base/window_period.vue"
+  import dynamicSingle from "@/components/base/dynamicSingle.vue"
+  import newStep from "@/components/base/new_step.vue"
+  import routineFixedobj from "@/components/base/routine_fixedobj.vue"
+  import dynamicLinksingle from "@/components/base/dynamic_linksingle.vue"
+  import fixColumn from './fixColumn.vue';
+  import showFixcolmn from './showFixcolmn';
+
+  
+
   import {
     Loading
   } from 'element-ui';
+  import New_step from "../../../base/new_step";
   // let loadingInstance1 = Loading.service({ fullscreen: true });
   export default {
     components: {
+      New_step,
       chartBar,
       chartTable,
       chartLine,
@@ -353,9 +391,20 @@
       viewOtherclo,
       funnel,
       windowPeriod,
+      dynamicSingle,
+      newStep,
+      routineFixedobj,
+      dynamicLinksingle,
+      fixColumn,
+      showFixcolmn
     },
     data() {
       return {
+        show_fixcolmn_num: 0,
+        openShowFixcolumn: false, //显示配置的固定列falg
+        fixed_column: [],
+        fixcolmunFlag: false, //固定列弹框
+        fixColumnDialog: false, //固定列dialong
         flag: true,//防抖
         data_error: '', //数据加载失败原因
         agg_type: "", //指标类型
@@ -384,6 +433,8 @@
         renderwantClo: false,
         task_name:"",
         show_submit: true,
+        show_condition: true,
+        ford_decs: "页面收起",
         task: {
           showStep: false,
           step: 1,
@@ -468,9 +519,197 @@
             value: "BETWEEN"
           },
         ],
+        downloadWhere: "",
       }
     },
     methods: {
+      showFixcolmnFun() {
+        this.openShowFixcolumn = true;
+        this.show_fixcolmn_num++; //重新渲染展示组件
+      },
+      configureFixColumn() {
+        this.fixcolmunFlag = !this.fixcolmunFlag;
+      },
+      changeFixcolmnFun(list) {
+        this.fixed_column = list;
+      },
+      fixColumnParam() { //固定列参数拼接
+        // this.show.where = '';
+        // this.show.order = "";
+        // this.show.specified_column = [];
+        var where=[];
+        // console.log(paramWhere,"param")
+        // if(type=="download") {
+        //   where = paramWhere;
+        // }
+        for (var column of this.fixed_column) {
+          //数值
+          if (column.type == 'number') {
+            if (column.op == 'BETWEEN') {
+              if (column.start != '' && column.end != '' && column.start && column.end) {
+                where.push('(' + column.column + ' ' + column.op + " " + column.start +
+                  "  AND  " + column.end + ")")
+              }
+            } else {
+              if (column.value != '' && column.value) {
+                where.push('(' + column.column + ' ' + column.op + " " + column.value +
+                  ')');
+              }
+            }
+          }
+          //字符串   
+          if (column.type == 'string') {
+            if (column.op == 'BETWEEN') {
+              if (column.start != '' && column.end != '' && column.start && column.end) {
+                where.push('(' + column.column + ' ' + column.op + " '" + column.start +
+                  "'  AND  '" + column.end + "')")
+              }
+            } else {
+              if (column.value != '' && column.value) {
+                where.push('(' + column.column + ' ' + column.op + " '" + column.value +
+                  "'" + ')');
+              }
+            }
+          }
+          //固定维度
+          if (column.type == 'dimension') {
+            //固定维度全选时候
+            if(column.is_check_all) {
+              //  where.push('(' + column.column + ' ' + '=' + ' ' + '1==1' + ')')
+            }else{
+              //固定维度的多选情况
+              if (column.multiple && column.values.length > 0) {
+                var in_array = [];
+                for (var in_value of column.values) {
+                  in_array.push("'" + in_value + "'")
+                }
+                where.push('(' + column.column + ' ' + 'IN' + "(" + in_array.join(
+                    ',') +
+                  ")" + ')');
+              }
+
+              //固定维度的单选情况
+              if (!column.multiple && column.value != '') {
+                where.push('(' + column.column + ' ' + '=' + " '" + column.value +
+                  "'" + ')');
+              }
+            }
+          }
+          //时间类型
+          if (column.type == 'time') {
+            if (column.time_type == 'STATIC') {
+              if (column.op == '=') {
+                var value = new Date(column.value);
+                if (column.time_granularity == 'DATE') {
+                  value = value.Format('yyyy-MM-dd');
+                }
+                if (column.time_granularity == 'HOUR') {
+                  value = value.Format('yyyy-MM-dd HH');
+                }
+                if (column.time_granularity == 'SECOND') {
+                  value = value.Format('yyyy-MM-dd HH:mm:ss');
+                }
+                where.push('(' + column.column + ' ' + column.op + " '" + value +
+                  "')")
+              } else { //column.op == 'between'
+                var start = new Date(column.time_range[0]);
+                var end = new Date(column.time_range[1]);
+                if (column.time_granularity == 'DATE') {
+                  start = start.Format('yyyy-MM-dd');
+                  end = end.Format('yyyy-MM-dd');
+                }
+                if (column.time_granularity == 'HOUR') {
+                  start = start.Format('yyyy-MM-dd HH');
+                  end = end.Format('yyyy-MM-dd HH');
+                }
+                if (column.time_granularity == 'SECOND') {
+                  start = start.Format('yyyy-MM-dd HH:mm:ss');
+                  end = end.Format('yyyy-MM-dd HH:mm:ss');
+                }
+                where.push('(' + column.column + ' ' + 'BETWEEN' + " '" + start +
+                  "'  AND  '" + end + "')")
+              }
+            } else {
+              var time_units = column.time_units;
+              var time_value = column.time_value;
+              var end = new Date().Format('yyyy-MM-dd 23:59:59');
+              var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (1 - 1))).Format(
+                'yyyy-MM-dd 00:00:01');
+              if (time_units == 'HOURS') { //最近N小时
+                var end = (new Date(new Date().getTime() - 3600 * 1000)).Format('yyyy-MM-dd HH:59:59');
+                var start = (new Date(new Date().getTime() - 3600 * 1000 * time_value)).Format(
+                  'yyyy-MM-dd HH:00:01');
+              }
+              if (time_units == 'DAYS') { //最近N天
+                var end = new Date().Format('yyyy-MM-dd 23:59:59');
+                var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (time_value - 1))).Format(
+                  'yyyy-MM-dd 00:00:01');
+                if (column.only_one) {
+                  var end = new Date(start).Format(
+                    'yyyy-MM-dd 23:59:59')
+                }
+              }
+              if (time_units == 'WEEK') { //最近N周
+                var today = new Date();
+                var now = today.getDay();
+                var start = new Date(today.getTime() - 86400 * 1000 * (now - 1));
+                var end = new Date(today.getTime() + 86400 * 1000 * (7 - now));
+
+                var end = end.Format('yyyy-MM-dd 23:59:59');
+                var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (time_value * 7 - 1))).Format(
+                  'yyyy-MM-dd 00:00:01');
+                if (column.only_one) {
+                  var end = new Date(new Date(start).getTime() + 86400 * 1000 * 6).Format(
+                    'yyyy-MM-dd 23:59:59')
+                }
+              }
+              if (time_units == 'MONTH') { //最近月小时
+                var now = new Date();
+                var now2 = new Date();
+                var start = new Date();
+                var end = new Date();
+                start.setMonth(now.getMonth() - (time_value - 1));
+                var start = start.Format('yyyy-MM-01 00:00:01');
+                now.setMonth(now.getMonth() + 1);
+                now.setDate(0);
+                var end = now.Format('yyyy-MM-dd 23:59:59');
+                if (column.only_one) {
+                  var start_object = new Date(start);
+                  start_object.setMonth(start_object.getMonth() + 1);
+                  start_object.setDate(0);
+                  end = start_object.Format('yyyy-MM-dd 23:59:59');
+                }
+              }
+
+              var start = new Date(start);
+              var end = new Date(end);
+              if (column.time_granularity == 'DATE') {
+                start = start.Format('yyyy-MM-dd');
+                end = end.Format('yyyy-MM-dd');
+              }
+              if (column.time_granularity == 'HOUR') {
+                start = start.Format('yyyy-MM-dd HH');
+                end = end.Format('yyyy-MM-dd HH');
+              }
+              if (column.time_granularity == 'SECOND') {
+                start = start.Format('yyyy-MM-dd HH:mm:ss');
+                end = end.Format('yyyy-MM-dd HH:mm:ss');
+              }
+              if (column.op == 'BETWEEN') {
+                where.push('(' + column.column + ' ' + 'BETWEEN' + " '" + start +
+                  "'  AND  '" + end + "')")
+              } else {
+                where.push('(' + column.column + ' ' + column.op + " '" + start +
+                  "')")
+              }
+
+            }
+          }
+        }
+
+        //显示设置参数拼接
+        this.refreshData(where);
+      },
       changeRencloData() {
         this.show.number++;
       },
@@ -479,27 +718,28 @@
         fullscreen: true
         });
         if (this.show.show_data) {
-          var where = [];
-          for (var v of this.show.where) {
-            if (v.field && v.value.trim() && v.op != 'BETWEEN') {
-              where.push(' ' + v.field + ' ' + v.op + " '" + v.value.trim() + "' ");
-            }
-            if (v.field && v.start.trim() && v.end.trim() && v.op == 'BETWEEN') {
-              where.push(' (' + v.field + ' ' + v.op + " '" + v.start.trim() + "' AND '" + v.end.trim() + "' )");
-            }
-          }
-          if (where.length > 0) {
-            where = where.join(' AND ');
-          } else {
-            where = '';
-          }
+          this.fixColumnParam();
+          // var where = [];
+          // for (var v of this.show.where) {
+          //   if (v.field && v.value.trim() && v.op != 'BETWEEN') {
+          //     where.push(' ' + v.field + ' ' + v.op + " '" + v.value.trim() + "' ");
+          //   }
+          //   if (v.field && v.start.trim() && v.end.trim() && v.op == 'BETWEEN') {
+          //     where.push(' (' + v.field + ' ' + v.op + " '" + v.start.trim() + "' AND '" + v.end.trim() + "' )");
+          //   }
+          // }
+          // if (where.length > 0) {
+          //   where = where.join(' AND ');
+          // } else {
+          //   where = '';
+          // }
           var designateColumns = this.show.show_col=='otherCol'?this.wantUseclo:[];
           var url = this.$store.state.api_url.task.get_csv_path;
           var param = this.$generateParams({
             "designateColumns": designateColumns,
             task_id: this.task.task_id,
             type: this.type,
-            where:where,
+            where:this.downloadWhere,
           });
           this.axios.post(url, param).then((res) => {
             var data = res.data;
@@ -643,11 +883,11 @@
     /**
      * 显示设置处点击确定的时候刷新数据
      */
-    refreshData: function() {
+    refreshData(where) {
 
       this.convert.convert_type = 'agg';
       var order = {};
-      var where = [];
+      // var where = [];
       if (this.show.order_field != '') {
         order[this.show.order_field] = this.show.order_type == 'ASC';
       }
@@ -664,6 +904,7 @@
       } else {
         where = '';
       }
+      this.downloadWhere = where;
       var url = this.$store.state.api_url.task.find_data;
       var param = this.$generateParams({
         task_id: this.task.task_id,
@@ -1072,6 +1313,7 @@
       this.isEdit = true;
       var task_info = '';
       if (this.type == 'task') { //我的分析 详情
+        this.show_condition=false;
         var task_detail_url = this.$store.state.api_url.task.find_sql;
         var param = this.$generateParams({
           task_ids: [task_id]
@@ -1308,6 +1550,18 @@
         this.renderwantClo = true;
       }
     },
+    showConditions(){
+      this.show_condition = !this.show_condition
+    },
+    isFold(){
+      if (this.show_condition){
+        this.ford_decs = "页面收起"
+        return "/static/images/icon/fordup.png"
+      } else {
+        this.ford_decs = "页面展开"
+        return "/static/images/icon/unford.png"
+      }
+    }
   },
   created() {
       this.$store.state.page_name = "多维分析";
@@ -1316,10 +1570,12 @@
         this.type = get.type;
       }
       if (get.hasOwnProperty('mid')) {
+        this.can_save_view = true;
         this.add(get.mid);
         return;
       }
       if (get.hasOwnProperty('task_id')) {
+        this.can_save_view = true;
         this.edit(get.task_id);
         return;
       }
@@ -1335,3 +1591,4 @@
     }
   }
 </script>
+

@@ -10,7 +10,7 @@
         <el-option label="仅自己" value="self"></el-option>
       </el-select>
       <router-link to="/hive/log/filter_add" v-if="$access('/hive/log/filter_add')">
-        <el-button type="primary" icon="el-icon-plus" class="add-btn"></el-button>
+        <el-button size="mini" type="primary" icon="el-icon-plus" class="add-btn"></el-button>
       </router-link>
     </div>
 

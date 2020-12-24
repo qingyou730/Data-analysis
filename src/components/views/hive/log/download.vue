@@ -30,7 +30,7 @@
         <!-- <span style="display: inline-block; margin-left:20px">关键词： </span>
         <el-input v-model="keyWord" placeholder="请输入关键词" style="width:200px"></el-input> -->
         <span style="display: inline-block; margin-left:60px"> </span>
-        <el-button  type="primary" @click="searchRes">搜索</el-button>
+        <el-button size="small" type="primary" @click="searchRes">搜索</el-button>
     </el-row>
     <table class="table table-bordered" >
       <thead>

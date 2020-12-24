@@ -8,6 +8,8 @@ import DataCronList from '@/components/views/data/timing/list.vue'
 import DataCreChart from '@/components/views/data/timing/chart.vue'
 import TaskDetail from '@/components/views/analysis/model/task.vue'
 import DataCronHistory from '@/components/views/data/timing/history.vue'
+import DataGroupVariableList from '@/components/views/data/group/variableList.vue'
+import routineConfigure from '@/components/views/data/group/routineConfigure.vue'
 
 var data = [
 	{
@@ -80,6 +82,42 @@ var data = [
   	name: '定时任务-查看',
   	component: TaskDetail
   },
+  {
+  	path: '/data/dynamic/add_folder',
+  	name: '动态群组-文件夹管理',
+  	component: NullComponent
+  },
+  {
+  	path: '/data/dynamic/add',
+  	name: '动态群组-动态群组管理',
+  	component: NullComponent
+  },
+  {
+  	path: '/data/variable/list',
+  	name: '公共变量-列表',
+  	component: DataGroupVariableList
+  },
+  {
+  	path: '/data/variable/add',
+  	name: '公共变量-管理',
+  	component: NullComponent
+	},
+	{
+  	path: '/data/group/routineconfigure',
+  	name: '常规配置-列表',
+  	component: routineConfigure
+	},
+	{
+  	path: '/data/group/routineadd',
+  	name: '常规配置-管理',
+  	component: NullComponent
+  },
+  
+  
+  
+  
+  
+  
 
 ]
 

@@ -3,6 +3,7 @@
         <el-dialog
             title="编辑文件夹"
             :visible.sync="value"
+            :before-close="close"
             :close-on-click-modal="wrapper_no"
             width="30%">
             <p style="border-top: 1px solid #ccc"></p>
@@ -20,7 +21,7 @@
 </template>
 <script>
 export default {
-    props: ["value", "id"],
+    props: ["value", "id","name"],
     data() {
         return{
             newName: '',
@@ -56,6 +57,11 @@ export default {
                 console.log(errors);
             })
         },
+    },
+    mounted(){
+        if(this.name) {
+            this.newName = this.name;
+        }
     },
     watch: {
         newName:{

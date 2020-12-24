@@ -31,11 +31,11 @@
         <template v-for="(item, index) in groundList">
           <tr :key="index">
             <td><span class="text-length"  :title="item.name">{{ item.name}}</span></td>
-            <td><span class="text-length"  :title="item.desc">{{ item.desc }}</span></td>
+            <td><span class="text-length"  :title="item.desc">{{ $tools.replaceRowSpace(item.desc) }}</span></td>
             <td>{{ item.model_name }}</td>
             <td>
-              <router-link :to="'/data/group/member?id=' + item.group_id" v-if="item.group_id!=''">{{ item.group_id }}</router-link>
-              <span v-else> </span>
+              <router-link :to="'/data/group/member?id=' + item.group_id" v-if="item.group_id!=''">{{item.group_id}}</router-link>
+              <span v-else> -- </span>
             </td>
             <td>{{ type_list[item.type] }}</td>
             <td>{{  $tools.formatTime(item.create_time) }}</td>

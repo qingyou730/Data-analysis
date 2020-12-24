@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <el-container v-if="module && module != 'public'" style="margin: 0;">
+    <el-container v-if="module && module != 'public' && ($store.state.user.user_id )" style="margin: 0;" >
       <el-header style="height: auto;margin: 0;padding: 0;">
         <!-- <myheader></myheader> -->
         <new-header></new-header>
@@ -9,12 +9,12 @@
         <el-container class="w-main">
           <el-main style="">
             <div class="view-name-box" v-if="$store.state.view_name">
-               <a class="back-button"  href="javascript:;" @click="$router.go(-1)"><i class="el-icon-back"></i></a>
-               <span class="view-name-title">{{$store.state.view_name}}</span>
+              <a class="back-button" href="javascript:;" @click="$router.go(-1)"><i class="el-icon-back"></i></a>
+              <span class="view-name-title">{{$store.state.view_name}}</span>
             </div>
-            <div class="view-name-box" v-if="$route.path == '/doc/event/event_attr'"  @click="$router.push({path: '/doc/event/event_table', query: {page: $store.state.event_page}})">
-               <a class="back-button"  href="javascript:;"><i class="el-icon-back"></i></a>
-                <span class="view-name-title" style="cursor:pointer">返回</span>
+            <div class="view-name-box" v-if="$route.path == '/doc/event/event_attr'" @click="$router.push({path: '/doc/event/event_table', query: {page: $store.state.event_page}})">
+              <a class="back-button" href="javascript:;"><i class="el-icon-back"></i></a>
+              <span class="view-name-title" style="cursor:pointer">返回</span>
             </div>
             <el-row style="width: 100%;" class="container-row">
               <!-- 							<el-col :span="24" class="container-title">
@@ -22,7 +22,7 @@
 								</el-page-header>
 							</el-col> -->
               <el-col :span="24" class="form-container">
-                <router-view :key="$store.state.page_key + ($route.query.page ? $route.query.page : 1)" />
+                <router-view v-if="$store.state.menu_load" :key="$store.state.page_key + ($route.query.page ? $route.query.page : 1)" />
               </el-col>
             </el-row>
           </el-main>
@@ -30,19 +30,19 @@
       </el-container>
       <div class="sql-container" v-if="$route.path=='/hive/sqllab/submit'">
         <div class="view-name-box" v-if="$store.state.view_name">
-            <a class="back-button"  href="javascript:;" @click="$router.go(-1)"><i class="el-icon-back"></i></a>
-            <span class="view-name-title">{{$store.state.view_name}}</span>
+          <a class="back-button" href="javascript:;" @click="$router.go(-1)"><i class="el-icon-back"></i></a>
+          <span class="view-name-title">{{$store.state.view_name}}</span>
         </div>
-          <!-- 							<el-col :span="24" class="container-title">
+        <!-- 							<el-col :span="24" class="container-title">
             <el-page-header :content="$store.state.page_name"  @back="goBack">
             </el-page-header>
           </el-col> -->
-        <div  class="sql-wrapper-first">
-          <router-view :key="$store.state.page_key + ($route.query.page ? $route.query.page : 1)" />
+        <div class="sql-wrapper-first">
+          <router-view v-if="$store.state.menu_load" :key="$store.state.page_key + ($route.query.page ? $route.query.page : 1)" />
         </div>
       </div>
     </el-container>
-    <div class="w-container"  v-if="module == 'public'" style="margin: 0;">
+    <div class="w-container" v-if="module == 'public'" style="margin: 0;">
       <router-view />
     </div>
     <dialog-tips :display='$store.state.dialog_display' :tips='$store.state.dialog_tips' :jump_url='$store.state.jump_url'></dialog-tips>
@@ -62,9 +62,9 @@
       newHeader: newHeader,
       dialogTips: dialogTips
     },
-    data(){
+    data() {
       return {
-        'module':'' ,//当前是哪个模块
+        'module': '', //当前是哪个模块
       }
     },
     methods: {
@@ -74,23 +74,33 @@
       goBack: function() {
 
       },
-      setModule:function(path){
-        var parse_path = path.split('/') ;
-        this.module = parse_path[1] ;
-        if(path=='/'){ //首页敏捷看板
-          this.module = 'analysis' ;
+      setModule: function(path) {
+        var parse_path = path.split('/');
+        this.module = parse_path[1];
+        if (path == '/') { //首页敏捷看板
+          this.module = 'analysis';
         }
       }
     },
     mounted() {
       //判断当前是哪个模块
-      this.setModule(this.$route.path) ;
-
+      this.setModule(this.$route.path);
+      var requestUrl = this.$store.state.api_url.admin.login_user;
+      if(this.$route.path!='/public/user/login'){
+        this.axios.post(requestUrl).then((response) => {
+          if(response.data.code == 200){
+            var user = response.data.data;
+            this.$store.state.user =  user ;
+          }
+        }).catch((error) => {
+          console.log('app初始化用户失败');
+        });
+      }
     },
     watch: {
       $route: {
         handler(val, oldVal) {
-          this.setModule(this.$route.path) ;
+          this.setModule(this.$route.path);
         },
         deep: true
       }
@@ -120,6 +130,7 @@
     overflow-x: hidden;
     overflow-y: auto;
   }
+
   .sql-container {
     margin-top: 63px;
     display: -webkit-box;
@@ -133,10 +144,12 @@
     box-sizing: border-box;
     background: #fff;
   }
-  .sql-wrapper-first{
+
+  .sql-wrapper-first {
     width: 100%;
     min-height: 100%;
   }
+
   .w-main {
     padding-top: 20px;
     margin-top: 20px;
@@ -145,7 +158,7 @@
   .container-row {
     background: #fff;
     border-radius: 5px;
-    border: 1px solid #ddd;
+    border: 0px solid #ddd;
   }
 
   .container-title {

@@ -1,4 +1,7 @@
 export default {
+  "public":{
+    "object_type_list":"/mmp/model/base/object_type_list" , //对象类型列表接口
+  },
   "menu": {
     "list": "/app/menu/list", //菜单列表页接口
     "add": "/app/menu/add", //菜单添加接口
@@ -22,7 +25,8 @@ export default {
     "add": "/app/auth/group/add", //添加接口
     "delete": "/app/auth/group/delete", //删除接口
     "detail": "/app/auth/group/find_by_id", //部门详情页面
-    "update": "/app/auth/group/update", //修改接口
+    "update": "/app/auth/group/update", //修改接口/app/auth/user/get_user_by_group
+    "get_user_by_group": "/app/auth/user/get_user_by_group", //根据部门ID获取部门用户
   },
   "game": {
     "list": "/app/auth/game/list", //列表页接口
@@ -63,6 +67,8 @@ export default {
     'delete_task': '/mmp/task/delete_task',//我的分析删除
     'is_private_time_task': '/mmp/task/is_private_time_task',//定时任务参看权限
     'get_column':"/mmp/task/get_task_table_column", //获取任务字段
+    'set_time_task_fix_column':"/mmp/task/set_time_task_fix_column", //设置固定列
+    'get_dimension':"/mmp/model/base/get_dimension", //通过字段类型获取属性字段
   },
   view: {
     "list": "/mmp/taskView/find_task_views", //视图列表
@@ -105,5 +111,12 @@ export default {
   },
   "report":{
     "create":"/mmp/report/add_custom_report" , //创建自定义报表
+    "detail":'/mmp/report/custom_report_detail', //报表详情
+    "result":"/mmp/report/custom_report_result" ,//报表结果
+    "total":"/mmp/report/custom_report_total" ,//自定义报表total
+    "download":"/mmp/report/download_custom_report" ,//下载
+    "edit_fixed_column":"/mmp/report/edit_fixed_column",
+    "publish":"/mmp/report/publish_custom_report", //发布自定义报表
+    
   }
 }

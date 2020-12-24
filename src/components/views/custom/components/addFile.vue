@@ -3,6 +3,8 @@
         <el-dialog
             title="添加文件夹"
             :visible.sync="value"
+            :before-close="close"
+            :close-on-click-modal="wrapper_no"
             width="30%">
             <div style="margin:auto">
                 <el-input
@@ -11,7 +13,7 @@
                     v-model="file_name">
                 </el-input>
             </div>
-            <div style="margin:12px 20% 32px; color:red">请选着上级文件夹，默认是一级文件夹</div>
+            <div style="margin:12px 20% 32px; color:red" v-if="custom_left.docment_data.length>0">请选择上级文件夹，默认是一级文件夹</div>
             <div>
                 <div style="width:80%;margin:32px 20% 32px">
                     <div class="custom-docment-wra custom-docment-wra-remove">
@@ -87,6 +89,7 @@ export default {
             collpaes_key_second:1,
             collpaes_key_third:1,
             level: 1,
+            wrapper_no:false,
         }
     },
     methods:{

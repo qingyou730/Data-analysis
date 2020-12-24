@@ -37,7 +37,7 @@
           <td>{{ $store.state.user_list.hasOwnProperty(item.create_role) ? $store.state.user_list[item.create_role] :  item.create_role}}</td>
           <td>{{ $tools.formatTime(item.schedule_time)}}</td>
           <td>{{ $tools.formatTime(item.finish_time)}}</td>
-          <td>{{ item.elapsed}}</td>
+          <td>{{ $tools.replaceRowSpace(item.elapsed)}}</td>
           <td>
             <el-button type="text" size="mini" @click='limitJump(item, index)'>查看</el-button>
             <el-button v-if="item.status=='ACCEPTED' || item.status=='RUNNING'" type="text" size="mini" @click="cancel(item)">取消任务</el-button>

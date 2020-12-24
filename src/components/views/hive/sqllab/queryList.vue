@@ -49,7 +49,7 @@ export default {
   margin: 5px;
   font-weight: bold;
   font-size: 16px;
-  overflow: scroll;
+  overflow: hidden;
 }
 .query-list pre .hljs{
   color: black;

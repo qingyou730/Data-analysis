@@ -1,156 +1,254 @@
 <template>
-  <el-dialog title="新建报表" :visible.sync="visible" :before-close="closeDialog" width="1200px" :close-on-click-modal="false">
-    <el-row class="w-dialog-header">
-      <div class="report-step">
-        <span :class="['report-step-number',{'on':step>=1}]">1</span>
-        <span :class="['report-step-text',{'on':step>=1}] ">创建报表</span>
-        <span :class="['report-step-line ',{'on':step>=1}]"></span>
+  <div class="fix-col-wrapper">
+    <el-dialog title="新建报表" top="7vh" :visible.sync="value" custom-class="creat-report" :before-close="preCloseDialog"
+      width="1200px" :close-on-click-modal="false">
+      <el-row class="w-dialog-header">
+        <div class="report-step">
+          <span :class="['report-step-number',{'on':step>=1}]">1</span>
+          <span :class="['report-step-text',{'on':step>=1}] ">创建报表</span>
+          <span :class="['report-step-line ',{'on':step>=1}]"></span>
 
-        <span :class="['report-step-number',{'on':step>=2}]">2</span>
-        <span :class="['report-step-text',{'on':step>=2}] ">选择关联列</span>
-        <span :class="['report-step-line ',{'on':step>=2}]"></span>
-
-
-        <span :class="['report-step-number',{'on':step>=3}]">3</span>
-        <span :class="['report-step-text',{'on':step>=3}] ">选择报表指标</span>
+          <span :class="['report-step-number',{'on':step>=2}]">2</span>
+          <span :class="['report-step-text',{'on':step>=2}] ">选择关联属性</span>
+          <span :class="['report-step-line ',{'on':step>=2}]"></span>
 
 
-      </div>
-      <el-form :model="step_1" :rules="rules">
-        <!--第一步 创建报表-->
-        <template v-if="step==1">
-          <el-form-item label="报表名称" label-width="100px" prop="name">
-            <el-input v-model="step_1.name" autocomplete="off" placeholder="给报表起一个名字"></el-input>
-          </el-form-item>
-          <el-form-item label="报表类型" label-width="100px" prop="type">
-            <el-radio @change="initTask" v-model="step_1.type" label="DYNAMIC">动态报表</el-radio>
-            <el-radio @change="initTask" v-model="step_1.type" label="STATIC">静态报表</el-radio>
-          </el-form-item>
+          <span :class="['report-step-number',{'on':step>=3}]">3</span>
+          <span :class="['report-step-text',{'on':step>=3}] ">选择报表指标</span>
 
-          <el-form-item label="添加任务" label-width="100px" prop="task_ids">
-            <el-select v-model="search_task.search_type" @change="searchType($event,true)" style="width: 100px;">
-              <!-- <el-option label="所有人" value="all"></el-option> -->
-              <el-option label="部门" value="department"></el-option>
-              <el-option label="仅自己" value="self"></el-option>
-            </el-select>
 
-            <el-select @change="changeTaskIds()" v-model="step_1.task_ids" style="width: 400px;" v-if="task_list && task_list.length>0"
-              multiple filterable collapse-tags clearable>
-              <el-option v-if="step_1.type=='DYNAMIC'" v-for="(item,k) in task_list" :label="item.name" :key="k" :value="item.id"></el-option>
-              <el-option v-if="step_1.type=='STATIC'" v-for="(item,k) in task_list" :label="item.view_name" :key="k"
-                :value="item.view_id"></el-option>
-            </el-select>
-            <div>
-              <el-tag :key="tag" v-for="(tag,index) in step_1.task_ids" type="info" closable style="margin-right: 20px;"
-                :disable-transitions="false" @close="removeTaskId(index)">
-                {{task_name_map[tag]}}
-              </el-tag>
-            </div>
-          </el-form-item>
-        </template>
-
-        <template v-if="step==2">
-          <template v-for="(task_id,task_order) in step_1.task_ids">
-            <el-form-item :key="task_id" :label="task_name_map[task_id]" label-width="300px">
-              <el-checkbox-group v-model="step_2.current_field[task_order]" @change="singleChecked(step_2.current_field[task_order],task_order)">
-                <el-checkbox :disabled="step_2.field_checked[task_order].has(field)" v-for="(field,f_order) in task_field[task_id]"
-                  :label="field" :key="f_order">{{field}}</el-checkbox>
-              </el-checkbox-group>
-              <p v-if="task_order == (step_1.task_ids.length-1)">
-                <el-button size="small" style="color: #3e8fff;" @click="addRelationField">确定</el-button>
-              </p>
+        </div>
+        <el-form :model="step_1" :rules="rules">
+          <!--第一步 创建报表-->
+          <template v-if="step==1">
+            <el-form-item label="报表名称" label-width="100px" prop="name">
+              <el-input v-model="step_1.name" autocomplete="off" placeholder="给报表起一个名字"></el-input>
             </el-form-item>
-          </template>
+            <el-form-item label="报表类型" label-width="100px" prop="type">
+              <el-radio @change="initTask" v-model="step_1.type" label="DYNAMIC">动态报表</el-radio>
+              <el-radio @change="initTask" v-model="step_1.type" label="STATIC">静态报表</el-radio>
+            </el-form-item>
 
-          <el-form-item label="关联属性" label-width="300px">
-            <div class="relation_field_container">
-              <el-row class="relation_field_row" v-for="(row,row_index) in step_2.relation_field_list" :key="row_index">
-                <i @click="removeRelationField(row_index)" class="fa fa-minus-square-o" style="color:#0e73ff ;font-size: 25px;line-height: 32px;vertical-align: middle; cursor: pointer;"></i>
-                <el-tag v-for="(field,f_index) in row.field_list" effect="plain" type="info" :key="f_index">
-                  {{field}}
+            <el-form-item label="添加任务" label-width="100px" prop="task_ids">
+              <el-select v-model="search_task.search_type" @change="searchType($event,true)" style="width: 100px;">
+                <!-- <el-option label="所有人" value="all"></el-option> -->
+                <el-option label="部门" value="department"></el-option>
+                <el-option label="仅自己" value="self"></el-option>
+              </el-select>
+
+              <el-select @change="changeTaskIds()" v-model="step_1.task_ids" style="width: 400px;" v-if="task_list && task_list.length>0"
+                multiple filterable collapse-tags clearable>
+                <el-option v-if="step_1.type=='DYNAMIC'" v-for="(item,k) in task_list" :label="item.name" :key="k"
+                  :value="item.id"></el-option>
+                <el-option v-if="step_1.type=='STATIC'" v-for="(item,k) in task_list" :label="item.view_name" :key="k"
+                  :value="item.view_id"></el-option>
+              </el-select>
+              <div>
+                <el-tag :key="tag" v-for="(tag,index) in step_1.task_ids" type="info" closable style="margin-right: 20px;"
+                  :disable-transitions="false" @close="removeTaskId(index)">
+                  {{task_name_map[tag]}}
                 </el-tag>
-                <i class="fa fa-long-arrow-right" style="color:#0e73ff ;font-size: 25px;line-height: 32px;vertical-align: middle;margin:0 15px; "></i>
-                <el-input :placeholder="(row.is_different ? '请输入重命名' : row.field_list[0]) " style="width: 200px;"
-                  v-model="row.alias"></el-input>
-              </el-row>
-            </div>
-          </el-form-item>
-
-
-        </template>
-        <template v-if="step==3">
-          <!-- 已选择的关联属性字段 -->
-          <el-form-item label="已选择的关联属性" label-width="300px" class="gray-label">
-            <el-tag :key="index" v-for="(tag,index) in step_2.relation_field_list" type="info" style="margin-right: 20px;"
-              :disable-transitions="false" @>
-              {{tag.alias ? tag.alias : tag.field_list[0]}}
-            </el-tag>
-          </el-form-item>
-
-          <template v-for="(task_id,task_order) in step_1.task_ids">
-            <el-form-item :key="task_id" :label="task_name_map[task_id]" label-width="300px">
-              <el-checkbox-group v-model="step_3.column_ids[task_order]" @change="changeIndicators(task_order)">
-                <el-checkbox v-for="(field,f_order) in task_field[task_id]" :label="field" :key="f_order">{{field}}</el-checkbox>
-              </el-checkbox-group>
-
-              <template v-if="task_order == (step_1.task_ids.length-1)">
-                {{step_3.type}}
-                <el-button @click="setTab('rename')" :type="step_3.tab == 'rename' ? 'primary' : ''">指标重命名</el-button>
-                <el-button @click="setTab('preview')" :type="step_3.tab == 'preview' ? 'primary' : ''">报表预览</el-button>
-              </template>
-
+              </div>
             </el-form-item>
+            <el-form-item label="主任务" label-width="100px" prop="task_ids" v-if="step_1.main_task_options.length>1">
+              <el-select  v-model="step_1.main_task" style="width: 400px;" filterable clearable>
+                <el-option  v-for="(item,k) in step_1.main_task_options" :label="item.name" :key="k"
+                  :value="item.id"></el-option>
+              </el-select>
+              <el-tooltip class="item" effect="dark" content="需要指定一个主任务，作为报表的主要数据依赖；其他任务根据主任务做left join" placement="right">
+                <i class="el-icon-question" style="font-size: 20px;color: #ccc;"></i>
+              </el-tooltip>
+            </el-form-item>
+            <el-form-item label="主任务" label-width="100px" prop="task_ids" v-else>
+              <el-input style="width: 400px;" filterable clearable disabled placeholder="单个任务不需要选择主任务"></el-input>
+              <el-tooltip class="item" effect="dark" content="需要指定一个主任务，作为报表的主要数据依赖；其他任务根据主任务做left join" placement="right">
+                <i class="el-icon-question" style="font-size: 20px;color: #ccc;"></i>
+              </el-tooltip>
+            </el-form-item>
+    
           </template>
 
-          <div class="preview-table-container">
-            <!--重命名-->
-            <template v-if="step_3.tab == 'rename'">
-              <div v-for=" task_id in step_1.task_ids" :key="task_id" style="margin-bottom: 10px;width: max-content;padding: 5px;">
-                {{task_name_map[task_id]}}
-                <template v-for="(col,col_index) in step_3.column_list" v-if="col.task_id == task_id">
-                  <span :key="col_index" style="display: inline-block;margin: 5px 10px;">
-                    <el-button size="small">{{col.column}}</el-button>
-                    <i class="fa fa-long-arrow-right" style="color:#0e73ff ;font-size: 25px;line-height: 32px;vertical-align: middle;margin:0 5px; "></i>
-                    <el-input size="small" style="width: 100px;" clearable :placeholder="col.column" v-model="col.alias"></el-input>
+          <template v-if="step==2">
+            <template v-for="(task_id,task_order) in step_1.task_ids">
+              <el-form-item :key="task_id">
+                <el-row>
+                  <p v-if="step_1.main_task_options.length==1" style="margin-left: 325px;color:#0e73ff;">单个任务不需要选择关联属性</p>
+                  <span style="display: inline-block;text-align: right;padding: 0 10px;width:300px" :title="task_name_map[task_id]">
+                    {{task_name_map[task_id].length>7?task_name_map[task_id].slice(0,7)+'...':task_name_map[task_id]}}
                   </span>
-                </template>
+                  <el-checkbox-group :disabled='step_1.main_task_options.length==1' v-model="step_2.current_field[task_order]" @change="singleChecked(step_2.current_field[task_order],task_order)"
+                    style="display:inline-block;">
+                    <el-checkbox :disabled="step_2.field_checked[task_order].has(field)" v-for="(field_type,field) in task_field[task_id]"
+                      :label="field" :key="field">{{field}}</el-checkbox>
+                  </el-checkbox-group>
+                </el-row>
+                <p  v-if="task_order == (step_1.task_ids.length-1)" style="margin-left:324px;margin-top: 6px;">
+                  <el-button :disabled='step_1.main_task_options.length==1' size="small" 
+                    :style="{'color': '#3e8fff','color':step_1.main_task_options.length==1?'#000':'', 'background':step_1.main_task_options.length==1?'#f4f4f5':''}"  @click="addRelationField">添加</el-button>
+                </p>
+              </el-form-item>
+            </template>
+
+            <el-form-item label="关联属性" label-width="150px">
+              <div class="relation_field_container">
+                <el-row class="relation_field_row" v-for="(row,row_index) in step_2.relation_field_list" :key="row_index">
+                  <i @click="removeRelationField(row_index)" class="fa fa-minus-square-o" style="color:#0e73ff ;font-size: 25px;line-height: 32px;vertical-align: middle; cursor: pointer;"></i>
+                  <el-tag v-for="(field,f_index) in row.field_list" effect="plain" type="info" :key="f_index" v-if="row.preservation">
+                    {{field}}
+                  </el-tag>
+                  <el-input :placeholder="(row.is_different ? '请输入名称' : row.field_list[0]) " style="width: 200px"
+                    :class="[{'in-red-outline': row.addclassFalg}, 'input-identical-height']" v-if="!row.preservation"
+                    v-model="row.alias" :ref="'aliad'+row_index" @input="cancelOutline(row)" clearable></el-input>
+                  <!-- <span style="display:inline-block;color:rgb(14, 115, 255);padding:0 4px;cursor:pointer" v-if="!row.preservation" @click="preservationName(row)">保存</span> -->
+                  <span style="display:inline-block;color:rgb(14, 115, 255);padding:0 4px;cursor:pointer" v-if="!row.preservation"
+                    @click="cancelReNameFlag(row)">取消</span>
+                  <span style="display: inline-block;color:rgb(14, 115, 255);padding-left:12px;cursor:pointer" v-if="!row.flag"
+                    @click="changReNameFlag(row)"> 重命名 </span>
+                </el-row>
               </div>
-            </template>
-            <!--预览报表-->
-            <template v-if="step_3.tab == 'preview'">
-              <table class="table table-bordered preview-table" style="width: max-content;">
-                <thead>
-                  <tr>
-                    <th style="width:180px;background-color: #D5D5D5;">指标</th>
-                    <th style="width:180px;background-color: #0E73FF;color: white;" :key="col_index" v-for="(col,col_index) in step_3.column_list">{{col.alias ? col.alias : col.column }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style="background-color: #D5D5D5;">数据</td>
-                    <td style="background-color: #0E73FF;color: white;" :key="col_index" v-for="(col,col_index) in step_3.column_list">--</td>
-                  </tr>
-                </tbody>
-              </table>
-            </template>
-          </div>
-        </template>
+            </el-form-item>
 
-      </el-form>
-    </el-row>
 
-    <div slot="footer" class="dialog-footer">
-      <el-button @click="closeDialog">取 消</el-button>
-      <el-button type="primary" v-if="this.step!=1" @click="preStep">上一步</el-button>
-      <el-button type="primary" v-if="this.step!=3" @click="nextStep">下一步</el-button>
-      <el-button type="primary" v-if="this.step==3" @click="save">确 定</el-button>
-    </div>
-  </el-dialog>
+          </template>
+          <template v-if="step==3">
+            <!-- 已选择的关联属性字段 -->
+            <el-form-item label="已选择的关联属性" label-width="324px" class="gray-label"  v-if="step_1.main_task_options.length!=1">
+              <!-- <el-tag :key="index" v-for="(tag,index) in step_2.relation_field_list" type="info" style="margin-right: 20px;"
+                :disable-transitions="false" @>
+                {{tag.alias ? tag.alias : tag.field_list[0]}}
+                :label="tag.alias ? tag.alias : tag.field_list[0]"
+              </el-tag> -->
+              <el-checkbox-group v-model="step_3.column_ids['0']" @change="changeIndicators(0)"
+                style="display:inline-block;">
+                <el-checkbox v-for="(tag,index) in step_2.relation_field_list" :label="tag.field_list[0]"  :key="index+
+                  'tag'" :disabled="!step_2.select_status">{{tag.alias ? tag.alias : tag.field_list[0]}}</el-checkbox>
+              </el-checkbox-group>
+              <el-checkbox v-model="step_2.select_status" style="margin-left:18px"
+               @change="openSelectParams">呈现在报表</el-checkbox>
+            </el-form-item>
+            <template v-for="(task_id,task_order) in step_1.task_ids">
+              <el-form-item :key="task_id">
+                <!-- :label="task_name_map[task_id].length>7?task_name_map[task_id].slice(0,7)+'...':task_name_map[task_id]" label-width="300px"-->
+                <el-row>
+                  <span style="display: inline-block;text-align: right;padding: 0 10px;width:300px" :title="task_name_map[task_id]">
+                    {{task_name_map[task_id].length>7?task_name_map[task_id].slice(0,7)+'...':task_name_map[task_id]}}
+                  </span>
+                  <el-checkbox-group v-model="step_3.column_ids[task_order]" @change="changeIndicators(task_order)"
+                    style="display:inline-block;">
+                    <el-checkbox v-for="(field_type,field) in step_3.task_field[task_id]" :label="field" :key="field">{{field}}</el-checkbox>
+                  </el-checkbox-group>
+                </el-row>
+
+                <template v-if="task_order == (step_1.task_ids.length-1)">
+                  <div style="margin-left:324px;margin-top: 24px;">
+                    {{step_3.type}}
+                    <el-button @click="setTab('rename')" :type="step_3.tab == 'rename' ? 'primary' : ''">指标重命名</el-button>
+                    <el-button @click="setTab('preview')" :type="step_3.tab == 'preview' ? 'primary' : ''">报表预览</el-button>
+                  </div>
+                </template>
+              </el-form-item>
+            </template>
+            <div class="preview-table-container" style="height: 240px;">
+              <!--重命名-->
+              <template v-if="step_3.tab == 'rename'">
+                <div v-for=" task_id in step_1.task_ids" :key="task_id" style="margin-bottom:0px;width: max-content;padding: 5px 3px;">
+                  <span style="display: inline-block;text-align: right;padding: 0 10px;" :title="task_name_map[task_id]">
+                    {{task_name_map[task_id].length>7?task_name_map[task_id].slice(0,7)+'...':task_name_map[task_id]}}
+                  </span>
+                  <template v-for="(col,col_index) in step_3.column_list" v-if="col.task_id == task_id">
+                    <span :key="col_index" style="display: inline-block;margin: 2px 10px;">
+                      <el-button size="small" v-if="col.preservation">{{col.alias?col.alias:col.column}}</el-button>
+                      <!-- <i class="fa fa-long-arrow-right" style="color:#0e73ff ;font-size: 25px;line-height: 32px;vertical-align: middle;margin:0 5px; "></i> -->
+                      <el-input size="small" style="width: 100px;" clearable :placeholder="col.column" v-model="col.alias"
+                        :ref="'step'+col_index" v-if="!col.preservation" :class="[{'in-red-outline': col.addclassFalg}]"></el-input>
+                      <!-- <span style="display:inline-block;color:rgb(14, 115, 255);padding:0 4px;cursor:pointer" v-if="!col.preservation" @click="preservationName(col)">保存</span> -->
+                      <span style="display:inline-block;color:rgb(14, 115, 255);padding:0 4px;cursor:pointer" v-if="!col.preservation"
+                        @click="cancelReNameFlag3(col)">取消</span>
+                      <span style="display: inline-block;color:rgb(14, 115, 255);padding-left:12px;cursor:pointer" v-if="!col.flag"
+                        @click="changReNameFlag(col)"> 重命名 </span>
+                    </span>
+                  </template>
+                </div>
+              </template>
+              <!--预览报表-->
+              <template v-if="step_3.tab == 'preview'">
+                <table class="table table-bordered preview-table pre-border-color" style="width: max-content;" :key="table_order_key+'order'"
+                  v-if="step_3.column_list.length>5">
+                  <thead>
+                    <tr>
+                      <th style="width:70px;background-color: #f4f4f5;text-align:center">指标</th>
+                      <th style="width:172px;background-color: #f4f4f5;text-align:center" :key="col_index" v-for="(col,col_index) in step_3.column_list">
+                        <el-tooltip class="item" effect="dark" content="左移" placement="bottom" v-if="col_index!=0">
+                          <span style="display:inline-block;margin:0 6px;float:left;cursor:pointer" @click="moveIndexLeft(col_index)"><i
+                              class="el-icon-arrow-left"></i></span>
+                        </el-tooltip>
+                        {{col.alias ? col.alias : col.column }}
+                        <el-tooltip class="item" effect="dark" content="右移" placement="bottom" v-if="col_index!=step_3.column_list.length-1">
+                          <span style="display:inline-block;margin:0 6px;float:right;cursor:pointer" @click="moveIndexRigth(col_index)"><i
+                              class="el-icon-arrow-right"></i></span>
+                        </el-tooltip>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="background-color: #f4f4f5;text-align:center">数据</td>
+                      <td style="background-color: white;text-align:center" :key="col_index" v-for="(col,col_index) in step_3.column_list">--</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table class="table table-bordered preview-table pre-border-color" style="width: max-content;" :key="table_order_key+'order'"
+                  v-else>
+                  <thead>
+                    <tr>
+                      <th style="width:70px;background-color: #f4f4f5;text-align:center">指标</th>
+                      <th style="width:172px;background-color: #f4f4f5;text-align:center" :key="col_index+'th-origin'"
+                        v-for="(col,col_index) in step_3.column_list">
+                        <el-tooltip class="item" effect="dark" content="左移" placement="bottom" v-if="col_index!=0">
+                          <span style="display:inline-block;margin:0 6px;float:left;cursor:pointer" @click="moveIndexLeft(col_index)"><i
+                              class="el-icon-arrow-left"></i></span>
+                        </el-tooltip>
+                        {{col.alias ? col.alias : col.column }}
+                        <el-tooltip class="item" effect="dark" content="右移" placement="bottom" v-if="col_index!=step_3.column_list.length-1">
+                          <span style="display:inline-block;margin:0 6px;float:right;cursor:pointer" @click="moveIndexRigth(col_index)"><i
+                              class="el-icon-arrow-right"></i></span>
+                        </el-tooltip>
+                      </th>
+                      <th style="width:172px;background-color: #f4f4f5;text-align:center" :key="col_index+'th-other'"
+                        v-for="(col,col_index) in 6-step_3.column_list.length">
+
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="background-color: #f4f4f5;text-align:center">数据</td>
+                      <td style="background-color: white;text-align:center" :key="col_index+'td-origin'" v-for="(col,col_index) in step_3.column_list">--</td>
+                      <td style="background-color: white;text-align:center" :key="col_index+'td-other'" v-for="(col,col_index) in 6-step_3.column_list.length">--</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+            </div>
+          </template>
+
+        </el-form>
+      </el-row>
+
+      <span slot="footer" :class="['dialog-footer',{'step1-dia-footer':step==1}]">
+        <div :style="{'margin-top': step==3&&step_1.main_task_options.length==1?'100px':''}">
+          <el-button type="primary" v-if="this.step!=1" @click="preStep">上一步</el-button>
+          <el-button type="primary" v-if="this.step!=3" @click="nextStep">下一步</el-button>
+          <el-button type="primary" v-if="this.step==3" @click="save">确 定</el-button>
+        </div>
+      </span>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
   export default {
-    props: ['value', 'id','folder_id'],
+    props: ['value', 'id', 'folder_id', "changeRigthKey","renderAddCustom","cancelPublic"],
     data() {
       return {
         step: 1,
@@ -158,6 +256,7 @@
           current_field: [], //当前选中的字段
           field_checked: [], //已经被选中的字段
           relation_field_list: [], //关联字段 [ {"alias":"别名","field_list":['任务1字段',"任务2字段",..]}]
+          select_status: false,
         },
         step_3: {
           'order_number': 1, //排序值
@@ -166,7 +265,11 @@
           'tab': 'preview', //rename  preview
           'column_count': [], //每个任务的指标count 
           'column_order': {}, //每个指标的书序
+          'params_ids': [],
+          task_field: [], //每个指标的任务的字段
         },
+        whatchData3: null,
+        render_3_table: [],
         search_task: { //任务列表筛选类型
           "filter_type": "user",
           "filter_value": "all",
@@ -180,7 +283,9 @@
           desc: "",
           type: "STATIC", //DYNAMIC 
           task_ids: [],
-          folder_id: "5fa8bbb17d54f61584f69caf", //
+          folder_id: this.folder_id, //
+          main_task_options: [],
+          main_task:'',
         },
         task_list: [], //可选任务列表
         task_name_map: {}, //任务 ID：name对象
@@ -202,6 +307,7 @@
           }],
         },
         visible: true,
+        table_order_key: 1,
         // filed_list_test: [
         //   ['平台', '大区', '玩家等级', '渠道', '最大付费人数', '资源变动-付费成功', '登录时间', '注册时间', '最后一次登录时间', '资源变动_付费成功'],
         //   ['资源变动-付费成功2', '登录时间2', '注册时间2', '最后一次登录时间2', '资源变动_付费成功2', '平台', '大区', '玩家等级2', '渠道2', '最大付费人数2'],
@@ -212,23 +318,131 @@
       }
     },
     created() {
-      if(this.folder_id){
-        this.step_1.folder_id = this.folder_id ;
+      if (this.folder_id) {
+        this.step_1.folder_id = this.folder_id;
       }
     },
     mounted() {
+      this.search_task.filter_value = this.$store.state.user.user_id;
       if (this.id) {
         this.get_edit_data();
-      }else{
-        this.initTask(false);  
+      } else {
+        this.initTask(false);
       }
-      
-
+      for (let i = 0; i < 6; i++) {
+        this.render_3_table.push({
+          addclassFalg: false,
+          alias: "",
+          column: "",
+          flag: false,
+          order: 1 + i,
+          preserFlag: false,
+          preservation: true,
+          task_id: "20201116000429_001026" + i,
+        })
+      }
     },
     methods: {
+      deleteExtraCol() {//删除this.step_3.column_list中step2取消的关联字段
+        if(this.step_3.column_list.length>0) {
+
+        }
+      },
+      changeRelationAlias(associate_field) {
+        associate_field.forEach((item,index)=>{
+          if(item.name) {
+            this.step_3.column_list.forEach((innerItem, innerIndex)=>{
+              if(innerItem.column == item.field[innerItem.task_id]) {
+                innerItem.alias = item.name;
+              }
+            })
+          }
+        });
+      },
+      /**
+       * step_3参数指标发生变化
+       * @param {Object} openSelectParams
+       */
+      openSelectParams() {
+        var associate_field = this.make_relation_field_list();
+        if(this.step_2.select_status) {
+          this.step_2.relation_field_list.forEach((item,index)=>{
+              this.step_3.column_ids[0].push(item.field_list[0]);
+          })
+        }else{
+          this.step_2.relation_field_list.forEach((item,index)=>{
+              this.step_3.column_ids[0].forEach((fieldItem,fieldIndex)=>{
+                if(item.field_list[0] == fieldItem) {
+                  this.step_3.column_ids[0].splice(fieldIndex,1)
+                }
+              })
+          })
+        }
+        this.changeIndicators(0);
+        this.changeRelationAlias(associate_field);//给this.step_3.column_list中有alias项添加别名（绑定参数）
+      },
+      cancelOutline(item) {
+        item.addclassFalg = false;
+      },
+      focusReNameFlag(val, item) {
+        this.$refs[val][0].$refs.input.focus();
+        item.preservation = !item.preservation;
+      },
+      preservationName(item) {
+        if (!item.alias) {
+          this.$error("请输入重命名名称")
+          return;
+        }
+        // item.preservation = true;
+        item.addclassFalg = false;
+        item.preserFlag = true;
+        this.$success("保存成功");
+      },
+      cancelReNameFlag3(item) {
+        item.alias = "";
+        item.preservation = true;
+        item.flag = !item.flag;
+        item.addclassFalg = false;
+      },
+      cancelReNameFlag(item) {
+        let arr = JSON.parse(JSON.stringify(item.field_list));
+        let newarr = new Set(arr);
+        newarr = [...newarr]
+        if (arr.length > newarr.length) {
+          item.is_different = false;
+        }
+        item.alias = "";
+        item.preservation = true;
+        item.flag = !item.flag;
+        item.addclassFalg = false;
+      },
+      changReNameFlag(item) {
+        item.is_different = true;
+        item.preservation = false;
+        item.flag = !item.flag;
+      },
+      moveIndexLeft(index) {
+        let middleItem = null;
+        middleItem = JSON.parse(JSON.stringify(this.step_3.column_list[index]));
+        this.step_3.column_list[index] = this.step_3.column_list[index - 1];
+        this.step_3.column_list[index - 1] = middleItem;
+        this.step_3.column_list.forEach((item, index) => {
+          item.order = index + 1;
+        })
+        this.table_order_key++;
+      },
+      moveIndexRigth(index) {
+        let middleItem = null;
+        middleItem = JSON.parse(JSON.stringify(this.step_3.column_list[index]));
+        this.step_3.column_list[index] = this.step_3.column_list[index + 1];
+        this.step_3.column_list[index + 1] = middleItem;
+        this.step_3.column_list.forEach((item, index) => {
+          item.order = index + 1;
+        })
+        this.table_order_key++;
+      },
       get_edit_data: function() {
-        var url = '/mmp/report/custom_report_detail';
-        // var url = "/mmp/report/custom_report_result" ;
+        var url = this.$store.state.api_url.report.detail;
         var param = this.$generateParams({
           "id": this.id,
         });
@@ -237,14 +451,17 @@
           .then(rep => {
             if (rep.data.code == 200) {
               var web_param = JSON.parse(rep.data.data.web_param);
-              for(var i in web_param.step_2.field_checked){ //数组转化为集合 因为集合不能JSON转
+              for (var i in web_param.step_2.field_checked) { //数组转化为集合 因为集合不能JSON转
                 web_param.step_2.field_checked[i] = new Set(web_param.step_2.field_checked[i]);
               }
               this.step_1 = web_param.step_1;
               this.step_2 = web_param.step_2;
               this.step_3 = web_param.step_3;
-              this.initTask(true);  
-              for (var task_id of this.step_1.task_ids){
+              if(web_param.hasOwnProperty('search_task')){
+                this.search_task = web_param.search_task ;
+              }
+              this.initTask(true);
+              for (var task_id of this.step_1.task_ids) {
                 this.getColumn(task_id);
               }
             } else {
@@ -275,14 +492,26 @@
         }
         var column_list = [];
         var index = 0;
+        
+        //老的指标字段别名暂存
+        var old_alias = {} ;
+        for(var c of this.step_3.column_list){
+          old_alias[c.task_id +'_' + c.column] = c.alias ;
+        }
+        
         for (var task_columns of this.step_3.column_ids) {
           var task_id = this.step_1.task_ids[index];
           for (var column of task_columns) {
+            var old_alias_key = task_id +'_' + column ;
             column_list.push({
               "task_id": task_id,
               "column": column,
-              "alias": '',
+              "alias": old_alias.hasOwnProperty(old_alias_key) ? old_alias[old_alias_key] : '', //恢复旧的别名
               "order": this.step_3.column_order[task_id + '_' + column],
+              flag: old_alias.hasOwnProperty(old_alias_key) && old_alias[old_alias_key]  ? true : false ,
+              preservation: old_alias.hasOwnProperty(old_alias_key) && old_alias[old_alias_key]  ? false : true ,   
+              addclassFalg: false,
+              preserFlag: false,
             });
           }
           index++;
@@ -291,6 +520,9 @@
           return m.order - n.order;
         })
         this.$set(this.step_3, 'column_list', column_list);
+        this.whatchData3 = this.step_3.column_list;
+        var associate_field = this.make_relation_field_list();
+        this.changeRelationAlias(associate_field);
       },
       /**
        * @param {Object} $tab
@@ -326,8 +558,19 @@
         this.step_2.relation_field_list.push({
           "field_list": field_list,
           'alias': "",
-          "is_different": is_different
+          "is_different": is_different,
+          flag: false,
+          preservation: true,
+          addclassFalg: false,
+          preserFlag: false,
         });
+
+        this.step_3.column_list = [];
+        this.step_3.column_ids.forEach(item=>{
+          item.length = 0;
+        });
+
+        this.step_2.select_status = false;
       },
       /**
        * 删除关联字段
@@ -342,6 +585,25 @@
           t++;
         }
         this.step_2.relation_field_list.splice(index, 1);
+        this.step_3.column_list = [];
+        this.step_3.column_ids.forEach((item,index)=>{
+          item.length = 0;
+        });
+        this.step_2.select_status = false;
+      },
+      paramIndicators() {
+        if(this.step_3.column_ids[0].length>0) {//关联属性发生变化时候的操作--减少
+          this.step_2.relation_field_list.forEach((item,index)=>{
+              this.step_3.column_ids[0].forEach((fieldItem,fieldIndex)=>{
+                if(item.field_list[0] == fieldItem) {
+                  this.step_3.column_ids[0].splice(fieldIndex,1)
+                }
+              })
+            // }
+          })
+          this.step_2.select_status=false;
+          this.changeIndicators(0);
+        }
       },
       /**
        * @param {Object} value
@@ -360,14 +622,37 @@
         //任务发生变化的时候初始化第二部关联属性字段
         this.step_2.current_field = [];
         this.step_2.field_checked = [];
+        this.step_2.relation_field_list = [];
+        this.step_2.select_status = false;
 
         //任务发生变化初始化指标字段
         this.step_3.column_ids = [];
         this.step_3.column_list = [];
         this.step_3.column_count = [];
         this.step_3.column_order = {};
-        for (var i in this.step_1.task_ids) {
+        this.step_3.task_field = [];
 
+        this.step_1.main_task_options.length=0;
+        this.step_1.task_ids.forEach(item=>{ //主任务options
+          this.task_list.forEach(innerItem=>{
+            if(item == innerItem.view_id) {
+              if(this.step_1.type=="STATIC") {
+                this.step_1.main_task_options.push({'name': innerItem.view_name, 'id': innerItem.view_id});
+              }
+            }
+            if(item == innerItem.id) {
+              if(this.step_1.type=="DYNAMIC") {
+                 this.step_1.main_task_options.push({'name': innerItem.name, 'id': innerItem.id});
+              }
+            }
+          })
+        });
+        if(this.step_1.main_task_options.length == 1) { //如果只有一个报表
+          this.step_1.main_task = this.step_1.main_task_options[0].id;
+        }else{
+          this.step_1.main_task="";
+        }
+        for (var i in this.step_1.task_ids) {
           this.step_2.current_field.push([]);
           this.step_2.field_checked.push(new Set());
 
@@ -425,8 +710,13 @@
        * 初始化任务列表
        */
       initTask: function(is_edit) {
-        if(!is_edit){
+        if (!is_edit) {
           this.step_1.task_ids = [];
+        }
+        if(is_edit == this.step_1.type) {//添加切换变化
+          this.step_1.task_ids.length = 0;
+          this.step_1.main_task_options.length=0;
+          this.step_1.main_task = '';
         }
         if (this.step_1.type == 'STATIC') { //我的视图
           var requestUrl = this.$store.state.api_url.view.list;
@@ -451,8 +741,8 @@
           var param = this.$generateParams({
             page: 1,
             page_size: 999999999,
-            "filter_type": 'user', //this.search_task.filter_type,
-            "filter_value": 'all', //this.search_task.filter_value,
+            "filter_type": this.search_task.filter_type,
+            "filter_value": this.search_task.filter_value,
           });
           this.axios
             .post("/mmp/task/find_timed_tasks", param)
@@ -510,6 +800,10 @@
             this.$error("请选择任务");
             return;
           }
+          if(!this.step_1.main_task) {
+            this.$error('请选择主任务');
+            return;
+          }
           for (var task_id of this.step_1.task_ids) {
             if (!this.task_field.hasOwnProperty(task_id)) {
               this.$error("任务【" + this.task_name_map[task_id] + "】数据错误，请删除该任务");
@@ -521,17 +815,31 @@
           for (var v of this.step_2.relation_field_list) {
             if (v.is_different) {
               if (!v.alias) {
-                this.$error("字段名称不相同的关联字段必须起别名");
+                this.$error("属性字段名称不同时，需要重命名");
+                v.addclassFalg = true;
                 return;
               }
+              // if(!v.preserFlag) {
+              //   this.$error("请完成当前操作")
+              //   v.preserFlag = true;
+              //   v.addclassFalg = true;
+              //   return;
+              // }
             }
           }
           if (this.step_1.task_ids.length > 1 && this.step_2.relation_field_list.length == 0) {
             this.$error("多个任务的时候必须要有关联字段");
             return;
           }
+          //处理关联字段在step_3的显示
+          var associate_field = this.make_relation_field_list();
+          this.step_3.task_field = JSON.parse(JSON.stringify(this.task_field));
+          associate_field.forEach((item, index)=>{
+            for(let key in item.field){
+              delete this.step_3.task_field[key][item.field[key]];
+            }
+          })
         }
-
         if (this.step < 3) {
           this.step++;
         }
@@ -542,6 +850,20 @@
       closeDialog: function() {
         this.visible = false;
         this.$emit('input', false);
+      },
+      preCloseDialog: function() {
+        this.$confirm('关闭后将不可恢复, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+        }).then(() => {
+          this.visible = false;
+          this.$emit('input', false);
+        }).catch(() => {
+          // this.$message({
+          //   type: 'info',
+          //   message: '已取消删除'
+          // });          
+        });
       },
       /**
        * 组装关联字段参数
@@ -560,11 +882,14 @@
           }
           if (v.is_different) {
             if (!v.alias) {
-              throw new Error("字段名称不相同的关联字段必须起别名");
+              v.addclassFalg = true;
+              throw new Error("属性字段名称不同时，需要重命名");
             }
           }
           relation.name = v.alias ? v.alias : v.field_list[0];
           relation.field = field;
+          relation.flag = v.flag;
+          relation.preservation = v.preservation;
           associate_field.push(relation);
         }
         if (this.step_1.task_ids.length > 1 && associate_field.length == 0) {
@@ -594,6 +919,8 @@
             "field": col.column,
             "alias": col.alias ? col.alias : col.column,
             "order": col.order,
+            flag: col.flag,
+            preservation: col.preservation,
           });
           var key = col.alias ? col.alias : col.column;
           if (alias_check.hasOwnProperty(key)) {
@@ -605,6 +932,10 @@
         if (indicators_field.length == 0) {
           throw new Error("必须选择指标");
         }
+        let numOrder = 0;
+        indicators_field.forEach(item=>{//最后确定order唯一
+          item.order = numOrder++;
+        })
         return indicators_field;
       },
       save: function() {
@@ -612,13 +943,15 @@
           "step_1": this.step_1,
           "step_2": this.step_2,
           "step_3": this.step_3,
+          "search_task" :  this.search_task ,
         }
-     
+
         var param = {
           "name": this.step_1.name, //报表名称
           "type": this.step_1.type, //报表类型
           "folder_id": this.step_1.folder_id, //放在哪个下面 文件夹ID
           "task_list": this.step_1.task_ids, //任务ID列表
+          "main_task": this.step_1.main_task,
         };
         try {
           var associate_field = this.make_relation_field_list();
@@ -637,12 +970,12 @@
           this.$error("请选择文件夹");
           return;
         }
-        for(var i in web_param.step_2.field_checked){
-          web_param.step_2.field_checked[i] = Array.from(web_param.step_2.field_checked[i]);  
+        for (var i in web_param.step_2.field_checked) {
+          web_param.step_2.field_checked[i] = Array.from(web_param.step_2.field_checked[i]);
         }
         param.web_param = JSON.stringify(web_param);
-        if(this.id){
-          param.id = this.id ;
+        if (this.id) {
+          param.id = this.id;
         }
         var url = this.$store.state.api_url.report.create;
         var param = this.$generateParams(param);
@@ -651,6 +984,12 @@
           if (data.code == 200) {
             this.closeDialog();
             this.$success("自定义报表保存成功");
+            if(data.data.id) {
+              this.renderAddCustom(data.data.id, this.step_1.folder_id);
+              this.changeRigthKey();
+            }else{
+              this.changeRigthKey();
+            }
           } else {
             this.$error("自定义报表保存失败");
           }
@@ -661,16 +1000,22 @@
       },
     },
     computed: {},
-    watch: {},
+    watch: {
+      step_1:{
+        handler() {
+          console.log(this.step_1);
+        },
+        deep:true
+      }
+    },
   }
 </script>
 
 <style>
   .w-dialog-header {
     border-top: 1px solid #EAEAEA;
-    padding-top: 20px;
-  }
-
+    padding: 20px 55px 0 55px;
+  } 
   .report-step {
     margin: 0 auto;
     width: 1000px;
@@ -680,12 +1025,12 @@
 
   .report-step .report-step-number {
     display: inline-block;
-    width: 30px;
-    height: 30px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background-color: #D5D5D5;
-    line-height: 30px;
-    font-size: 25px;
+    line-height: 18px;
+    font-size: 12px;
     font-weight: bold;
     color: white;
   }
@@ -696,10 +1041,8 @@
   }
 
   .report-step-text {
-    line-height: 30px;
-    font-size: 25px;
-    margin: 0 25px;
-    color: #D5D5D5;
+    font-size: 18px;
+    margin: 0 12px 0 4px;
   }
 
   .report-step-text.on {
@@ -709,21 +1052,23 @@
   .report-step-line {
     display: inline-block;
     width: 50px;
-    height: 5px;
+    height: 4px;
     background-color: #D5D5D5;
     vertical-align: text-top;
-    margin-right: 20px;
-    margin-top: 5px;
+    margin: 0 32px 0 24px;
+    margin-top: 8px;
+    border-radius: 4px;
   }
 
   .relation_field_container {
-    min-height: 300px;
+    min-height: 318px;
     border: dashed 1px #D5D5D5;
+    overflow: auto;
   }
 
   .relation_field_row {
     padding-left: 15px;
-    padding-top: 15px;
+    padding-top: 6px;
   }
 
   .relation_field_row .el-tag {
@@ -746,5 +1091,65 @@
   .preview-table th,
   .preview-table td {
     border: 1px solid #9ba0a2;
+  }
+
+  .creat-report .el-dialog__body {
+    padding: 4px 20px 30px 20px;
+    color: #606266;
+    font-size: 14px;
+    word-break: break-all;
+  }
+
+  .pre-border-color thead tr th {
+    border: 1px solid #E4E4E4;
+  }
+
+  .pre-border-color tbody tr td {
+    border: 1px solid #E4E4E4;
+  }
+
+  .fix-col-wrapper .creat-report {
+    width: 65%;
+    height: 700px;
+    overflow: auto;
+  }
+
+  .fix-col-wrapper .creat-report .step1-dia-footer {
+    padding: 9px;
+    padding-top: 10px;
+    text-align: right;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    position: absolute;
+    bottom: 10px;
+    right: 17px;
+  }
+
+  .fix-col-wrapper .in-red-outline input {
+    border-color: red;
+  }
+
+  .fix-col-wrapper .input-identical-height input {
+    height: 32px;
+  }
+
+  .fix-col-wrapper .el-checkbox-group {
+    font-size: 0;
+    display: inline-block;
+    padding: 0 12px;
+    background: #ECEEFE;
+    border-radius: 4px;
+    box-sizing: border-box;
+    height: 32px;
+    line-height: 32px;
+  }
+
+  .fix-col-wrapper .el-form-item {
+    margin-bottom: 8px;
+  }
+
+  .fix-col-wrapper .el-checkbox__input.is-disabled+span.el-checkbox__label {
+    color: #c1c1c1;
+    cursor: not-allowed;
   }
 </style>

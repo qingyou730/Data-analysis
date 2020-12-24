@@ -16,8 +16,8 @@
         </div>
       </el-card>
     </div>
-    <div style="text-align:right;margin-right: 30px;">
-      <el-button @click="dialogVisible = true" type="text">
+    <div style="text-align:right;margin-right: 30px;visibility: hidden;">
+      <el-button @click="dialogVisible = true" type="text" >
         <el-image style="width: 50px;" :src="ellipsis"></el-image>
       </el-button>
     </div>
@@ -109,8 +109,8 @@
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="closeShareDialog">取 消</el-button>
-          <el-button type="primary" @click="submitPersons">确 定</el-button>
+          <el-button size="mini" @click="closeShareDialog">取 消</el-button>
+          <el-button size="mini" type="primary" @click="submitPersons">确 定</el-button>
         </div>
       </el-dialog>
     </div>
@@ -168,7 +168,7 @@
 
         let data = {
           "filter_type": "user",
-          "filter_value": this.$store.state.user.user_id ,
+          "filter_value": this.$store.state.user.user_id,
           "keyword": this.search,
           page_size: this.pageSize,
           page: this.currentPage,

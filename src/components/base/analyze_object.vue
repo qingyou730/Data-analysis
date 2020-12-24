@@ -18,22 +18,22 @@
     </div>
 
     <timer v-if="self_value.type=='platform'" title="时间范围" v-model="self_value.time"></timer>
-
     <div v-if="self_value.type=='group'" class="my-form-row">
-      <span class="my-form-label">群组 :</span>
-      <single v-model="self_value.user_group" :data_url="url_list.group_list"></single>
+      <span class="my-form-label">群组123 :</span>
+      <!--<single v-model="self_value.user_group" :data_url="url_list.group_list"></single>-->
+      <dynamic-single v-model="self_value.user_group" :data_url="url_list.group_list" :self_value="self_value"></dynamic-single>
     </div>
 
   </div>
 </template>
 <script>
   import timer from './timer.vue';
-  import single from '@/components/base/single'
+  import dynamicSingle from '@/components/base/dynamicSingle'
   import multipleSelect from '@/components/base/multiple_select'
   export default {
     components: {
       timer: timer,
-      single: single,
+      dynamicSingle: dynamicSingle,
       multipleSelect: multipleSelect,
     },
     props: ["title" ,"name" ,"moduleId" ,"apis","value"],
@@ -58,6 +58,8 @@
           user_group: '', //用户包
           platform: [], //平台
           type: 'waitToSet',
+          group_type: '',
+          sql: '',
         },
         is_confirm_object: false,
         options: {

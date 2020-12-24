@@ -9,7 +9,7 @@
         <el-option v-for="item in selectList" :key="item.value" :label="item.name" :value="item.value"></el-option>
       </el-select>
       <router-link :to="{path: '/data/behavior/addBehavior?object=' + selects}" v-if="$access('/data/behavior/addBehavior')">
-        <el-button type="primary" icon="el-icon-plus" class="add-btn"></el-button>
+        <el-button size="mini" type="primary" icon="el-icon-plus" class="add-btn"></el-button>
       </router-link>
     </div>
     <!-- 数据渲染 -->

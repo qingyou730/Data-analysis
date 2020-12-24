@@ -10,7 +10,7 @@
         <el-select v-model="step.agg_value" v-if="step.options.agg_selections.length > 0" @change="aggValueChanged(step)">
           <el-option v-for="item in step.options.agg_selections" :key="item.value" :label="item.name" :value="item.value"></el-option>
         </el-select>
-        <el-button v-if="steps.length>1"  @click="remove_step()" type="primary" icon="el-icon-minus" circle size="mini" class="root-add-btn"></el-button>
+        <el-button v-if="steps.length>1"  @click="remove_step(index)" type="primary" icon="el-icon-minus" circle size="mini" class="root-add-btn"></el-button>
         <el-dropdown placement="bottom">
           <el-button type="primary" icon="el-icon-plus" circle size="mini"></el-button>
           <el-dropdown-menu slot="dropdown">
@@ -299,11 +299,8 @@
         };
         this.steps.push(step)
       },
-      remove_step(node) {
-        var index = this.steps.indexOf(node)
-        if (this.steps.length > 1) {
-          this.steps.splice(index, 1);
-        }
+      remove_step(index) {
+        this.steps.splice(index, 1);
       },
       aggValueChanged(node, val) {
         let obj = {};

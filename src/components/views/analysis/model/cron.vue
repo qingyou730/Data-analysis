@@ -78,12 +78,12 @@
         this.$emit('input', false);
       },
       save: function() {
-        if (!this.cronName) {
-          this.$error("请输入任务名称");
-        }
-        if (!this.cronDesc) {
-          this.$error("请输入任务描述");
-        }
+        // if (!this.cronName) {
+        //   this.$error("请输入任务名称");
+        // }
+        // if (!this.cronDesc) {
+        //   this.$error("请输入任务描述");
+        // }
         var taskParam = {
           object: this.$store.state.linkage.object,
           name: this.cronName,

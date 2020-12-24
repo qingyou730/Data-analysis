@@ -4,6 +4,7 @@
             title="移动到文件夹"
             :visible.sync="value"
             :close-on-click-modal="wrapper_no"
+            :before-close="close"
             width="30%">
             <div style="margin:auto">
                 <el-input

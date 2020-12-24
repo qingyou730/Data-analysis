@@ -3,7 +3,7 @@
     <el-row class="page-titie-box">
       sql临时表
       <router-link to="/hive/mlist/add" v-if="$access('/hive/mlist/add')">
-        <el-button type="primary" icon="el-icon-plus" class="add-btn"></el-button>
+        <el-button size="mini" type="primary" icon="el-icon-plus" class="add-btn"></el-button>
       </router-link>
     </el-row>
     <el-row>
@@ -38,9 +38,9 @@
               <td>{{  $store.state.user_list.hasOwnProperty(item.username) ? $store.state.user_list[item.username] :  item.username}}</td>
               <td>{{ item.type }}</td>
               <td>{{ item.db_name }}</td>
-              <td>{{item.count}}</td>
-              <td v-if="item.type=='上传表'" style="cursor: pointer;color:#0e73ff" @click="formatUpSql(item.sql)">{{item.sql?item.sql.slice(0,25)+'...': ''}}</td>
-              <td v-if="item.type=='物化表'" style="cursor: pointer;color:#0e73ff" @click="formatObjSql(item.sql)"> {{item.sql?item.sql.slice(0,25)+'...': ''}}
+              <td>{{ $tools.replaceRowSpace(item.count) }}</td>
+              <td v-if="item.type=='上传表'" style="cursor: pointer;color:#0e73ff" @click="formatUpSql(item.sql)">{{item.sql?item.sql.slice(0,25)+'...': '--'}}</td>
+              <td v-if="item.type=='物化表'" style="cursor: pointer;color:#0e73ff" @click="formatObjSql(item.sql)"> {{item.sql?item.sql.slice(0,25)+'...': '--'}}
               </td>
               <td><font :color="status_list[item.status] ? status_list[item.status].color: '#212529'">{{status_list[item.status]?status_list[item.status].title:item.statuss}}</font></td>
               <td style="cursor: pointer;" @click="alertaFailedmag(item)">{{item.fail_msg?item.fail_msg.substr(0,4):'--'}}</td>

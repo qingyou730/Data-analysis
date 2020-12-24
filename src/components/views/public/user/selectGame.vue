@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-row>
+    <el-row v-if="game_list.length>0">
       <el-col :span="4" v-for="(game) in game_list" :key="game.app" style="cursor: pointer;" @click.native="changeGame(game)">
         <el-card :body-style="{ padding: '0px' }" style="text-align: center;">
           <img width="180" height="240" :src="game.avatar" class="image">
@@ -10,7 +10,9 @@
         </el-card>
       </el-col>
     </el-row>
-
+    <div v-else class="no-jurisdiction-home">
+      <div style="position: absolute;top: 50%;left: 50%;transform: translateX(-50%) translateY(138px);">当前未开启任何游戏权限，请联系管理员进行处理</div>
+    </div>
   </div>
 </template>
 
@@ -51,6 +53,13 @@
   }
 </script>
 <style>
+  .no-jurisdiction-home{
+    position: relative;
+    width: 100vw;
+    height: calc(100vh - 0px);
+    background: url("/static/images/no_jurisdiction_home.png")  center center no-repeat;
+    background-size: 250px 250px;
+  }
   #password-login-title {
     text-align: center;
     display: block;

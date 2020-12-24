@@ -9,6 +9,7 @@ import ElementUI from 'element-ui';
 // import 'element-ui/lib/theme-chalk/index.css';
 import '@/assets/element-var.scss' //引入这个文件里修改了elementui的样式
 import '@/assets/common.css'
+import '@/assets/style.css'
 import 'font-awesome/css/font-awesome.css';
 import axios from 'axios'
 import VueAxios from 'vue-axios'
@@ -103,6 +104,7 @@ Object.assign(api_url, sjl, wr);
 Vue.use(Vuex)
 const store = new Vuex.Store({
   state: {
+    menu_load:false,//菜单是否已经加入完成
     view_name:'', //视图查看的时候视图名称
     page_key:0,
     page_name: '页面名称', //显示页面名称

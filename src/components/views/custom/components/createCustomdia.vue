@@ -3,7 +3,7 @@
         <el-dialog
             title="添加报表到文件夹"
             :visible.sync="value"
-            :close-on-click-modal="wrapper_no"
+            :before-close="close"
             width="30%">
             <div style="margin:auto">
                 <el-input
@@ -83,7 +83,9 @@
 </template>
 <script>
 export default {
-    props: ["value","custom_left", "id"],
+    components:{
+    },
+    props: ["value","custom_left", "id","changeReportData","create_report_key","dia_add_folder_id"],
     data() {
         return{
             file_name: '',
@@ -95,7 +97,7 @@ export default {
             docment_list: [],
             newRenderArr: [],
             folder_id: '',
-            wrapper_no: false
+            wrapper_no: false,
         }
     },
     methods:{
@@ -221,26 +223,28 @@ export default {
                 this.$error("请选择文件夹");
                 return;
             }
-            let url = this.$store.state.api_url.custom.move_custom;
-            let data = {
-                "folder_id": this.folder_id,
-                "id": this.id,
-                "object": "role"
-            }
-            let param = this.$generateParams(data);
-            this.axios.post(url, param).then((res) => {
-                let data = res.data;
-                if (data.code == 200) {
-                    this.$success('移动成功');
-                    this.folder_id = '';
-                    this.close();
-                }else {
-                    this.$error(res.data.msg)
-                }
-            }).catch((errors) => {
-                console.log(errors);
-            })
             this.close();
+            this.changeReportData(this.folder_id, true);
+            // let url = this.$store.state.api_url.custom.move_custom;
+            // let data = {
+            //     "folder_id": this.folder_id,
+            //     "id": this.id,
+            //     "object": "role"
+            // }
+            // let param = this.$generateParams(data);
+            // this.axios.post(url, param).then((res) => {
+            //     let data = res.data;
+            //     if (data.code == 200) {
+            //         this.$success('移动成功');
+            //         this.folder_id = '';
+            //         this.close();
+            //     }else {
+            //         this.$error(res.data.msg)
+            //     }
+            // }).catch((errors) => {
+            //     console.log(errors);
+            // })
+            // this.close();
         },
         openClolapesItem(index, item) {//一级折叠操作
             this.$set(item, 'flag', !item.flag);

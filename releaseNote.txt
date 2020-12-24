@@ -73,4 +73,18 @@ Upgrade：
 
 
 
+v1.0.9
+Feature：
+ 漏斗模型 【王瑞】
+Upgrade：
+1.sql结果页extra字段点击展示json【丁玉东】
+
+
+
+
+
+
+
+
+
 

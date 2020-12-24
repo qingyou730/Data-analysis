@@ -36,6 +36,8 @@ export default {
     "sql_private": "/mmp/sql/set_save_sql_private",
     "sql_uptop": "/mmp/sql/set_save_sql_top",
     "cancel_sql_up": "/mmp/sql/unset_save_sql_top",
+    "sql_list": "/mmp/sql/sql_list",
+    "cancel_offline_sql": "/mmp/sql/cancel_offline_sql"
   },
   event: {//事件文档接口
     event_table_url: "/mmp/task/find_event_list",
@@ -49,6 +51,33 @@ export default {
     custom_list: "/mmp/report/custom_report_list",// 自定义报表列表
     del_custom_list: "/mmp/report/del_custom_report",// 删除自定义报表
     move_custom: "/mmp/report/move_custom_report",// 移动自定义报表
-  }
+    rename_custom: "/mmp/report/rename_custom_report",// 自定义报表重命名
+    set_access_user:"/mmp/report/set_access_user",
+    get_access_user:"/mmp/report/get_access_user",
+  },
+  dynamicDroup:{
+    create_dynamic_group: "/mmp/object/create_dynamic_group_info",//创建动态群组
+    del_dynamic_group: "/mmp/object/del_dynamic_group_info",//删除动态群组
+    dynamic_group_list: "/mmp/object/dynamic_group_info_list",//动态群组列表
+    find_dynamic_group: "/mmp/object/find_dynamic_group_info",//查找动态群组
+    add_file: "/mmp/object/add_group_folder",//新增动态群组文件夹
+    del_file: "/mmp/object/del_group_folder",//删除动态群组文件夹
+    find_folder_list: "/mmp/object/find_group_folder_list",//动态群组文件夹列表
+    move_dynamic_group: "/mmp/object/move_dynamic_group_info",//移动动态群组
+    rename_dynamic_group: "/mmp/object/rename_dynamic_group_info",//重命名动态群组
+    rename_group_folder: "/mmp/object/rename_group_folder",//重命名动态群组文件夹
+    get_access_user:"/mmp/object/get_access_user",//文件夹已经被授权的用户查询
+    set_access_user:"/mmp/object/set_access_user",
+    object_type_list: "/mmp/model/base/object_type_list/",  //选着对象
+    routine_bind_group: "/mmp/object/bind_dynamic_group",  //常规绑定动态群组
+    get_routine_bind_group: "/mmp/object/get_bind_dynamic_group",  //常规获取动态群组
+  },
+  public_variable:{
+    "add":"/mmp/object/add_public_param",
+    "list":"/mmp/object/public_param_list",
+    "delete":"/mmp/object/del_public_param",
+    "detail":"/mmp/object/find_public_param",
+  },
+ 
 
 }

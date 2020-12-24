@@ -13,7 +13,9 @@ import AnalysisModelTaskDetail from '@/components/views/analysis/model/taskDetai
 import AnalysisModelViewDetail from '@/components/views/analysis/model/viewDetail.vue'
 import AnalysisTaskLookparam from '@/components/views/analysis/task/lookparam.vue'
 import AnalysisTaskLooksql from '@/components/views/analysis/task/looksql.vue'
+import AnalysisTaskcontrolSee from '@/components/views/analysis/task/controlSee.vue'
 import AnalysisComponentsEdit from '@/components/views/analysis/components/edit.vue'
+
 
 var analysis = [
   {
@@ -121,6 +123,11 @@ var analysis = [
     path: '/analysis/task/looksql',
     name: '查看sql',
     component: AnalysisTaskLooksql
+  },
+  {
+    path: '/analysis/task/controlsee',
+    name: '参看权限',
+    component: AnalysisTaskcontrolSee
   },
   
 ]

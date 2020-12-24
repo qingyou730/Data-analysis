@@ -1,6 +1,6 @@
 <template>
     <div class="view-other-col">
-        <el-dialog title="显示指定列" :visible.sync="value" top="35vh">
+        <el-dialog title="显示指定列" :visible.sync="value" top="35vh" :before-close="closeDialog">
             <div style="margin-top: 2px">
                 <el-checkbox-group v-model="checkboxGroup" size="mini" ref="multipleTable">
                     <el-checkbox :label="item" border v-for="(item, index) in field_list" :key="index"></el-checkbox>

@@ -58,12 +58,14 @@
         </el-row>
         <el-dialog
             title="确认信息"
-            :visible.sync="delay_dialog"
+            :visible.sync="delay_dialog_hive"
             width="20%"
+            :before-close="handleClose"
+            append-to-body 
             >
             <el-input v-model="delayDays" placeholder="请输入要延期的天数"></el-input>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="delay_dialog = false">放弃修改</el-button>
+                <el-button @click="delay_dialog_hive = false">放弃修改</el-button>
                 <el-button type="primary" @click="submitDelay()">确 定</el-button>
             </span>
         </el-dialog>
@@ -94,12 +96,15 @@ export default {
             "search_type":"self",
             today: '今天',
             delayDays: null,
-            delay_dialog: false,
+            delay_dialog_hive: false,
             delay_id: null,
             delay_data: null,
         }
     },
     methods: {
+        handleClose() {
+            this.delay_dialog_hive=false;
+        },
         linkAddTabs(item) {//添加tabs标签查看记录
             this.addHiveTabs.sql = item;
             this.$emit('input', true);
@@ -122,7 +127,7 @@ export default {
             }
         },
         delayDate(item) {
-            this.delay_dialog = true;
+            this.delay_dialog_hive = true;
             this.delay_id = item.id;
             this.delay_data = item;
         },
@@ -154,7 +159,7 @@ export default {
                     this.$success('操作成功');
                     this.delayDays = null;
                     this.delay_id = "";
-                    this.delay_dialog = false;
+                    this.delay_dialog_hive = false;
                     // total_hits
                 }else{
                     this.$error(rep.data.msg);

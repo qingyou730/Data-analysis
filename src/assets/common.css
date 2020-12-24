@@ -31,7 +31,7 @@ html,body{margin:0 auto;height:100%;width:100%;font-family:"Microsoft YaHei",微
     background-color: #f5f5f5;
     border-bottom: 1px solid #ddd;
   }
-  .page-titie-box{line-height: 40px;}
+  .page-titie-box{line-height: 40px; margin-top: 12px;}
   .container-title .el-page-header{
     height: 40px;
     line-height: 40px;
@@ -201,7 +201,7 @@ html,body{margin:0 auto;height:100%;width:100%;font-family:"Microsoft YaHei",微
 /*步骤条 start*/
 #step_container *{font-size: 12px;}
 #step_container{width: 500px;height: 200px;position: fixed;left: 50%;top:108px;border: 1px solid #CCC;margin-left: -250px;background: white;z-index: 20;}
-#step_titile{height: 45px;color: #ADADAD;font-size: 16px;padding-left: 20px;padding-top: 4px;}
+#step_titile{height: 45px;font-size: 16px;}
 #step_titile .btn{display: inline-block;}
 #step_container .step{position: relative;display: inline-block;width: 35px;height: 35px;line-height: 35px;text-align: center;;border-radius: 50%;background: #E5E5E5;color: #A6A6A6;font-weight: bold;z-index: 2;}
 #step_container .line{position: relative;margin: 0 -7px;display: inline-block;width: 110px;height: 15px;background: #E5E5E5;z-index: 1;}
@@ -1370,19 +1370,27 @@ td.branch{
 
 
 /*登录页面*/
-.login-container{background: url(/static/images/bg.svg) no-repeat bottom center;min-height: 900px;background-size: contain;max-width: 1920px;min-width: 1200px;position: fixed;
+.login-container{
+    background: url(/static/images/bg.svg) no-repeat bottom center;
+    min-height: 720px;
+    background-size: contain;
+    max-width: 1920px;
+    min-width: 960px;
+    position: fixed;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
-   width: 80%;
-    height: 80%;
-    margin: auto;}
-#login-box{width: 450px;height: 380px;margin: auto;position: absolute; left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    margin-top: 100px;}
+   width: 50%;
+    height: 50%;}
+#login-box{
+    width: 450px;
+    height: 380px;
+    position: relative;
+    left: 62%;
+    top: 50%; /*偏移*/
+    transform: translateY(-60%);
+    }
 .w-container{
   width: 100%;height: 100%;overflow: hidden;
 }
@@ -1423,7 +1431,7 @@ td.branch{
 
 .input-suffix{color: #7A7A7A;line-height: 40px;}
 .select-suffix{color: #7A7A7A;line-height: 40px;margin-left: -50px;position: absolute;}
-.w-logo{color: #0E73FF !important;font-weight: bold;font-style: italic;font-size: 20px;}
+.w-logo{color: #0e73ff !important;font-weight: bold;font-style: italic;font-size: 20px;}
 .text-length{
   width: 140px;
   text-overflow: ellipsis;
@@ -1443,3 +1451,9 @@ td.branch{
 .table.bordered td{padding-top: 10px;padding-bottom: 10px;}
 .text-center{text-align: center !important;}
 .pointer{cursor: pointer;}
+.el-dialog{border-radius: 5px;}
+.checked-drop{color: #0e73ff !important;}
+.checked-drop button{color: #0e73ff !important;}
+.checked-drop input{color: #0e73ff !important;}
+#fixcolumn-position-task{position: relative;}
+.task-col-wrapper{margin-left: 205px;}

@@ -56,7 +56,7 @@
       if (this.value) {
         this.agg_list = this.value;
         this.options.is_edit = true;
-        if(this.time_type = this.$store.state.module_linkage[this.moduleId].time_type){
+        if(this.time_type != this.$store.state.module_linkage[this.moduleId].time_type){
           this.time_type = this.$store.state.module_linkage[this.moduleId].time_type;
         }
       }
@@ -231,8 +231,8 @@
             node.agg_name = '';
           }
           node.children = [] ;
-          this.createAlias(node);
         }
+        this.createAlias(node);
       },
       /**
        * 生成别名

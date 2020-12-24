@@ -41,7 +41,7 @@
       <el-dropdown placement="bottom">
         <span style="display: inline-block;height: 30px; width: 30px; font-size:22px; color: #ccc;"><i class="el-icon-question" style="width: 100%; height:100%"></i></span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item style="height: 20px; line-height:20px"><a @click="countHelp"  href='https://docs.qq.com/doc/DSHN0eFVsdk9wZ1pW' target="view_window">帮助中心</a></el-dropdown-item>
+          <el-dropdown-item style="height: 20px; line-height:20px"><a @click="countHelp"  href="https://alidocs.dingtalk.com/document/edit?dentryKey=RBZ3WEnxlSk1xxoN" target="view_window">帮助中心</a></el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <el-dropdown placement="bottom">
@@ -174,6 +174,7 @@
               }
             }
             this.$set(this.$store.state,'access_menu',access_map);
+            this.$store.state.menu_load = true ;
             this.show_menu_list = show_menu_list;
           }
         }).catch((error) => {
@@ -285,7 +286,7 @@
       }
     },
     mounted() {
-      this.update_menu_list();
+     this.update_menu_list();
      var url = this.$store.state.api_url.game.list;
      this.axios.post(url).then((response) => {
        let data = response.data

@@ -195,6 +195,7 @@
       }
     },
     mounted() {
+      this.options = this.$store.state.components_type.components_type;
       this.comId = '';
       if (this.$route.query.row != null) {
         this.formLabelAlign.name = this.$route.query.row.zhName;

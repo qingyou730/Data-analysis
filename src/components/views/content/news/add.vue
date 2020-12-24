@@ -1,16 +1,17 @@
 <template>
   <div>
-    <button @click="showCreateReport=true">创建报表</button>
-    <create-report v-if="showCreateReport" v-model="showCreateReport" ></create-report> 
+    <show-report id="5faba14462fa664dd8642025"></show-report> 
   </div>
 </template>
 
 <script>
   import createReport from '@/components/views/custom/base/createReport.vue'
+  import showReport from '@/components/views/custom/base/showReport.vue'
   import windowPeriod from '@/components/base/window_period.vue'
   export default {
     components:{
-      createReport
+      createReport,
+      showReport
     },
     data() {
       return {

@@ -340,7 +340,7 @@
 
       var url = this.$store.state.api_url.role.list;
       var param = {
-        "game": "kop",
+        "game": this.$store.state.APP.toUpperCase(),
         "page": 1,
         "page_size": 100000,
       }

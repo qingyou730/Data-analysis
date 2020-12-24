@@ -79,10 +79,10 @@
     </el-form>
     <div class="row">
       <el-col :span="24">
-        <el-button type="primary" id="submit" @click="subValue">
+        <el-button size="mini" type="primary" id="submit" @click="subValue">
         保存
         </el-button>
-        <el-button type="text" id="addBtn" @click="goback()">返回</el-button>
+        <el-button size="mini" type="text" id="addBtn" @click="goback()">返回</el-button>
       </el-col>
     </div>
   </div>
@@ -153,7 +153,7 @@ export default {
             .post(
               "/mmp/group/group_upload?group_id=" +
                 cGrounpId +
-                "&app=KOP&create_email=" +
+                "&app="+this.$store.state.APP.toUpperCase()+"&create_email=" +
                 "lixiaohui@game2sky",
               formData
             )

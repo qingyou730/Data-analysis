@@ -1,22 +1,17 @@
 <template>
-  <div>
-    <div style="width: 1200px;margin: 0 auto;position: relative;z-index: 1;">
-      <span class="w-logo" style="font-size: 40px;">DeepEye</span>
-    </div>
-    <div class="login-container">
-      <el-card id="login-box" class="login_page">
-        <span id="password-login-title">账号密码登录</span>
-        <el-input class="login-input" v-model="user_id" placeholder="请输入用户名" prefix-icon="el-icon-user" clearable></el-input>
-        <el-input class="login-input" v-model="password" placeholder="请输入密码" prefix-icon="el-icon-lock" clearable
-          show-password></el-input>
-        <div id="login-error" v-show="isFail">
-        </div>
-        <div id="remenber">
-          <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-        </div>
-        <el-button class="password-button" @click="onSubmit" type="primary">登录</el-button>
-      </el-card>
-    </div>
+  <div style="height: 100%;position: relative;background: url(/static/images/login_background.png);background-size: 100% 100%">
+    <el-card id="login-box" class="login_page">
+      <span id="password-login-title">账号密码登录</span>
+      <el-input class="login-input" v-model="user_id" placeholder="请输入用户名" prefix-icon="el-icon-user" clearable></el-input>
+      <el-input class="login-input" v-model="password" placeholder="请输入密码" prefix-icon="el-icon-lock" clearable
+                show-password></el-input>
+      <div id="login-error" v-show="isFail">
+      </div>
+      <div id="remenber">
+        <el-checkbox v-model="rememberMe">记住我</el-checkbox>
+      </div>
+      <el-button class="password-button" @click="onSubmit" type="primary">登录</el-button>
+    </el-card>
   </div>
 
 

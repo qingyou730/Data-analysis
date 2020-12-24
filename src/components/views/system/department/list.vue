@@ -75,7 +75,7 @@
       getData: function() {
         let url = this.$store.state.api_url.department.list;
         var param = {
-          "game": "kop",
+          "game": this.$store.state.APP.toUpperCase(),
           "page": this.page,
           "page_size": this.page_size,
         }
@@ -146,7 +146,7 @@
       this.getData();
       let url = this.$store.state.api_url.role.list;
       var param = {
-        "game": "kop",
+        "game": this.$store.state.APP.toUpperCase(),
         "page": 1,
         "page_size": 100000,
       }

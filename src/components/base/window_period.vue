@@ -36,7 +36,7 @@
         <el-select v-show="self_value.type=='DYNAMIC'" v-model="self_value.dynamic_time">
           <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
-        <el-tooltip class="item" effect="dark" :content="'第一个步骤发生的事件区间，后续步骤发生时间被延展到'+getShowText()" placement="top-start">
+        <el-tooltip class="item" effect="dark" :content="'第一个步骤发生的时间区间，后续步骤发生时间被延展到'+getShowText()" placement="top-start">
           <i class="el-icon-question icon-help"></i>
         </el-tooltip>
       </div>

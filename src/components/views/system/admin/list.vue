@@ -237,7 +237,7 @@
         this.loading = true;
         let url = this.$store.state.api_url.admin.list;
         var param = {
-          "game": "kop",
+          "game": this.$store.state.APP.toUpperCase(),
           "page": this.page,
           "page_size": this.page_size,
           "group_id":this.search.group_id,
@@ -402,7 +402,7 @@
 
       var url = this.$store.state.api_url.role.list;
       var param = {
-        "game": "kop",
+        "game": this.$store.state.APP.toUpperCase(),
         "page": 1,
         "page_size": 100000,
       }

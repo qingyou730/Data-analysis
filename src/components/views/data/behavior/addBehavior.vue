@@ -62,7 +62,7 @@
       </div>
       <el-divider></el-divider>
       <el-form-item>
-        <el-button @click="onClickSubmit" type="primary">提交</el-button>
+        <el-button size="mini" @click="onClickSubmit" type="primary">提交</el-button>
       </el-form-item>
     </el-form>
   </div>

@@ -102,9 +102,9 @@
             }
           }
 
-          var series=[] ;
+          var series = [];
           for (var field of this.select_field) {
-            series.push(series_map[field])  ;
+            series.push(series_map[field]);
           }
 
           option.xAxis.data = xAxisData;

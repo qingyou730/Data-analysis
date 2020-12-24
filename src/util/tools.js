@@ -1,10 +1,69 @@
 var tools = {
+    /**
+     * @param {Object} column
+     * 动态时间计算真实时间值
+     */
+    getDynamicTime:function(column){
+      if(!column.hasOwnProperty('time_units')){
+      return {
+          "start":new Date().Format('yyyy-MM-dd 00:00:00'),
+          "end":new Date().Format('yyyy-MM-dd 23:59:59')
+        };
+      }
+      var time_units = column.time_units;
+      var time_value = column.time_value;
+      var end = new Date().Format('yyyy-MM-dd 23:59:59');
+      var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (1 - 1))).Format(
+        'yyyy-MM-dd 00:00:00');
+      if (time_units == 'HOURS') { //最近N小时
+        var end = (new Date(new Date().getTime() - 3600 * 1000)).Format('yyyy-MM-dd HH:59:59');
+        var start = (new Date(new Date().getTime() - 3600 * 1000 * time_value)).Format(
+          'yyyy-MM-dd HH:00:00');
+      }
+      if (time_units == 'DAYS') { //最近N天
+        var end = new Date().Format('yyyy-MM-dd 23:59:59');
+        var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (time_value - 1))).Format(
+          'yyyy-MM-dd 00:00:00');
+      }
+      if (time_units == 'WEEK') { //最近N周
+        var today = new Date();
+        var now = today.getDay();
+        var start = new Date(today.getTime() - 86400 * 1000 * (now - 1));
+        var end = new Date(today.getTime() + 86400 * 1000 * (7 - now));
+      
+        var end = end.Format('yyyy-MM-dd 23:59:59');
+        var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (time_value * 7 - 1))).Format(
+          'yyyy-MM-dd 00:00:00');
+        if (column.only_one) {
+          var end = new Date(new Date(start).getTime() + 86400 * 1000 * 6).Format(
+            'yyyy-MM-dd 23:59:59')
+        }
+      }
+      if (time_units == 'MONTH') { //最近月小时
+        var now = new Date();
+        var now2 = new Date();
+        var start = new Date();
+        var end = new Date();
+        start.setMonth(now.getMonth() - (time_value - 1));
+        var start = start.Format('yyyy-MM-01 00:00:00');
+        now.setMonth(now.getMonth() + 1);
+        now.setDate(0);
+        var end = now.Format('yyyy-MM-dd 23:59:59');
+        if (column.only_one) {
+          var start_object = new Date(start);
+          start_object.setMonth(start_object.getMonth() + 1);
+          start_object.setDate(0);
+          end = start_object.Format('yyyy-MM-dd 23:59:59');
+        }
+      }
+      return {"start":start,"end":end}
+    },
     formatTime(time){
       if(time =='--'){
         return time ;
       }
       if(!time){
-        return '';
+        return '--';
       }
       var t = new Date(time) ;
       // t = t.valueOf();
@@ -24,6 +83,13 @@ var tools = {
           }
         }
       }
+    },
+
+    replaceRowSpace(item){
+      if (!item){
+        return '--'
+      }
+      return item
     },
   /**
    * @param {Object} data
@@ -371,6 +437,265 @@ var tools = {
     },
     single: function(value) {
       return this.success(value);
+    },
+    /**
+     *
+     * @param {动态群组} value
+     */
+    dynamicSingle(value) {
+      var value = JSON.parse(JSON.stringify(value));
+      if(value.group_type == "dynamic") {
+        this.concatPara(value);
+        delete value.column_list;
+        delete value.originalSql;
+        // delete value.scope_param;
+        delete value.big_column_list;
+        return this.success(value);
+      }else{
+        delete value.column_list;
+        delete value.originalSql;
+        delete value.scope_param;
+        delete value.big_column_list;
+        return this.success(value);
+      }
+    },
+    concatPara(originVale) {
+      var where = [];
+      var variable_values = {};
+      var scope_param = {};
+      originVale.big_column_list.forEach(item => { //每个参数的循环
+        if (item.is_scope) {
+          scope_param[item.field] = item.column[0].values;
+        }
+        item.variable.forEach(innerItem => { //每个变量的循环
+          var column = item.column[0];
+          var variable_value = {};
+          variable_value.name = item.name;
+          variable_value.variable_name = innerItem.alias;
+          variable_value.field = innerItem.value;
+          variable_value.type = column.type  ;
+          //字符串 
+          if (column.type == 'string') {
+            if (column.op == 'BETWEEN') {
+              variable_value.op = column.op;
+              variable_value.condition = '(' + innerItem.value + ' ' + column.op + " '" + column.start +
+                "'  AND  '" + column.end + "')";
+              variable_value.value = '';
+              variable_value.start = column.start;
+              variable_value.end = column.end;
+            } else {
+              variable_value.op = column.op;
+              variable_value.condition = '(' + innerItem.value + ' ' + column.op + " '" + column.value +
+                "'" + ')';
+              variable_value.value = column.value;
+              variable_value.start = '';
+              variable_value.end = '';
+            }
+          }
+          //数值类型
+          if (column.type == 'number') {
+            if (column.op == 'BETWEEN') {
+              variable_value.op = column.op;
+              variable_value.condition = '(' + innerItem.value + ' ' + column.op + " " + column.start +
+                "  AND  " + column.end + ")";
+              variable_value.value = '';
+              variable_value.start = column.start;
+              variable_value.end = column.end;
+            } else {
+              variable_value.op = column.op;
+              variable_value.condition = '(' + innerItem.value + ' ' + column.op + " " + column.value +
+                " " + ')';
+              variable_value.value = column.value;
+              variable_value.start = '';
+              variable_value.end = '';
+            }
+          }
+
+          //固定维度
+          if (column.type == 'dimension') {
+            //固定维度的多选情况
+            if (column.multiple && column.values.length > 0) {
+              var in_array = [];
+              for (var in_value of column.values) {
+                in_array.push("'" + in_value + "'")
+              }
+              variable_value.op = 'IN';
+              variable_value.condition = '(' + innerItem.value + ' ' + 'IN' + "(" + in_array.join(',') +
+                ")" + ')';
+              variable_value.value = in_array;
+              variable_value.start = '';
+              variable_value.end = '';
+            }
+
+            //固定维度的单选情况
+            if (!column.multiple && column.value != '') {
+              variable_value.op = '=';
+              variable_value.condition = '(' + innerItem.value + ' ' + '=' + " '" + column.value +
+                "'" + ')';
+              variable_value.value = column.value;
+              variable_value.start = '';
+              variable_value.end = '';
+            }
+
+          }
+          //时间类型
+          if (column.type == 'time') {
+            if (column.time_type == 'STATIC') {
+              if (column.op == '=') {
+                variable_value.op = column.op;
+                var value = '';
+                if(column.time_granularity == 'DATE'){
+                  value = new Date(column.value).Format('yyyy-MM-dd');
+                }
+                if(column.time_granularity == 'HOUR'){
+                  value = new Date(column.value).Format('yyyy-MM-dd HH');
+                }
+                if(column.time_granularity == 'SECOND'){
+                  value = new Date(column.value).Format('yyyy-MM-dd HH:mm:ss');
+                }
+                
+               
+                variable_value.condition = '(' + innerItem.value + ' ' + column.op + " '" + value +
+                  "'" + ')';
+                variable_value.value = value;
+                variable_value.start = value;
+                variable_value.end = value;
+              } else {
+                var start = new Date(column.time_range[0]);
+                var end = new Date(column.time_range[1]);
+                if (column.time_granularity == 'DATE') {
+                  start = start.Format('yyyy-MM-dd');
+                  end = end.Format('yyyy-MM-dd');
+                }
+                if (column.time_granularity == 'HOUR') {
+                  start = start.Format('yyyy-MM-dd HH');
+                  end = end.Format('yyyy-MM-dd HH');
+                }
+                if (column.time_granularity == 'SECOND') {
+                  start = start.Format('yyyy-MM-dd HH:mm:ss');
+                  end = end.Format('yyyy-MM-dd HH:mm:ss');
+                }
+                variable_value.op = 'BETWEEN';
+                variable_value.condition = '(' + innerItem.value + ' ' + 'BETWEEN' + " '" + start +
+                  "'  AND  '" + end + "')"
+                variable_value.value = '';
+                variable_value.start = start;
+                variable_value.end = end;
+              }
+            } else {
+              var time_units = column.time_units;
+              var time_value = column.time_value;
+              var end = new Date().Format('yyyy-MM-dd 23:59:59');
+              var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (1 - 1))).Format(
+                'yyyy-MM-dd 00:00:00');
+              if (time_units == 'HOURS') { //最近N小时
+                var end = (new Date(new Date().getTime() - 3600 * 1000)).Format('yyyy-MM-dd HH:59:59');
+                var start = (new Date(new Date().getTime() - 3600 * 1000 * time_value)).Format(
+                  'yyyy-MM-dd HH:00:00');
+              }
+              if (time_units == 'DAYS') { //最近N天
+                var end = new Date().Format('yyyy-MM-dd 23:59:59');
+                var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (time_value - 1))).Format(
+                  'yyyy-MM-dd 00:00:00');
+                if (column.only_one) {
+                  var end = new Date(start).Format(
+                    'yyyy-MM-dd 23:59:59')
+                }
+              }
+              if (time_units == 'WEEK') { //最近N周
+                var today = new Date();
+                var now = today.getDay();
+                var start = new Date(today.getTime() - 86400 * 1000 * (now - 1));
+                var end = new Date(today.getTime() + 86400 * 1000 * (7 - now));
+
+                var end = end.Format('yyyy-MM-dd 23:59:59');
+                var start = (new Date(new Date(end).getTime() - 86400 * 1000 * (time_value * 7 - 1))).Format(
+                  'yyyy-MM-dd 00:00:00');
+                if (column.only_one) {
+                  var end = new Date(new Date(start).getTime() + 86400 * 1000 * 6).Format(
+                    'yyyy-MM-dd 23:59:59')
+                }
+              }
+              if (time_units == 'MONTH') { //最近月小时
+                var now = new Date();
+                var now2 = new Date();
+                var start = new Date();
+                var end = new Date();
+                start.setMonth(now.getMonth() - (time_value - 1));
+                var start = start.Format('yyyy-MM-01 00:00:00');
+                now.setMonth(now.getMonth() + 1);
+                now.setDate(0);
+                var end = now.Format('yyyy-MM-dd 23:59:59');
+                if (column.only_one) {
+                  var start_object = new Date(start);
+                  start_object.setMonth(start_object.getMonth() + 1);
+                  start_object.setDate(0);
+                  end = start_object.Format('yyyy-MM-dd 23:59:59');
+                }
+              }
+
+              var start = new Date(start);
+              var end = new Date(end);
+              var value = '' ;
+              if (column.time_granularity == 'DATE') {
+                start = start.Format('yyyy-MM-dd');
+                end = end.Format('yyyy-MM-dd');
+                value = start;
+              }
+              if (column.time_granularity == 'HOUR') {
+                start = start.Format('yyyy-MM-dd HH');
+                end = end.Format('yyyy-MM-dd HH');
+                value = start;
+              }
+              if (column.time_granularity == 'SECOND') {
+                start = start.Format('yyyy-MM-dd HH:mm:ss');
+                end = end.Format('yyyy-MM-dd HH:mm:ss');
+                value = start;
+              }
+              
+              if(column.op == 'BETWEEN'){
+                variable_value.condition = '(' + innerItem.value + ' ' + 'BETWEEN' + " '" + start + "'  AND  '" +
+                  end + "')";
+              }else{
+                variable_value.condition =  '(' + innerItem.value + ' ' + column.op + " '" + value +
+                  "'" + ')';
+              }
+              variable_value.op =  column.op ;
+              variable_value.value = value;
+              variable_value.start = start;
+              variable_value.end = end;
+            }
+          }
+          variable_values[innerItem.alias] = variable_value;
+        })
+      })
+      originVale.scope_param = scope_param;
+      let middleSql = originVale.originalSql;
+      middleSql = this.handleSqlstr(middleSql, variable_values);
+      originVale.sql = middleSql;
+    },
+    handleSqlstr(middleSql, where) {
+      var reg = /([$#]).*?\{\s?(\w+)(\.start|\.end){0,1}\s?\}/g
+      var c = middleSql.replace(reg, ((search, $1, $2,$3) => {
+        var quotation = where[$2].type == 'number' ?  '' : "'" ; 
+        if ($1 == '$') {
+          return where[$2].condition;
+        }
+        if ($1 == '#') {
+          if(!$3){
+            return quotation + where[$2].value + quotation;
+          }else{
+            if($3 == '.start'){
+              return quotation + where[$2].start + quotation;
+            }
+            if($3 == '.end'){
+              return quotation + where[$2].end + quotation;
+            }
+          }
+          
+        }
+      }));
+      return c;
     },
     /**
      *
@@ -825,6 +1150,25 @@ var tools = {
     },
     linkageSingle: function(value) {
       return this.success(value);
+    },
+    dynamicLinksingle: function(value) {  //常规对象分析
+      return this.success(value);
+    },
+    routineFixedobj(value) {
+      var value = JSON.parse(JSON.stringify(value));
+      if(value.group_type == "dynamic") {
+        this.concatPara(value);
+        delete value.column_list;
+        delete value.originalSql;
+        delete value.big_column_list;
+        return this.success(value);
+      }else{
+        delete value.column_list;
+        delete value.originalSql;
+        delete value.scope_param;
+        delete value.big_column_list;
+        return this.success(value);
+      }
     },
     //事件分组
     eventGroup: function(value) {

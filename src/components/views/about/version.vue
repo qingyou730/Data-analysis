@@ -9,7 +9,7 @@
       <el-col :span="15" style="height: 100%;border: 1px solid #E8E8E8 ;padding: 15px;">
         <template v-if="isFirst">
            <h4>上线时间：2020年8月27日</h4>
-           <p style="text-indent:2em">使用手册参考文档: <a target="_blank" href="https://docs.qq.com/doc/DSHN0eFVsdk9wZ1pW">https://docs.qq.com/doc/DSHN0eFVsdk9wZ1pW</a></p>
+           <p style="text-indent:2em">使用手册参考文档: <a target="_blank" href="https://alidocs.dingtalk.com/document/edit?dentryKey=RBZ3WEnxlSk1xxoN">https://alidocs.dingtalk.com/document/edit?dentryKey=RBZ3WEnxlSk1xxoN</a></p>
         </template>
         <template v-else>
            <h4>上线时间：{{formatDate(detail.online_time)}}</h4>
